@@ -29,6 +29,8 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   const [isMuted, setIsMuted] = useState(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [voiceoverEnabled, setVoiceoverEnabled] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showContent, setShowContent] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Detect if slides have audio to determine initial voiceover state
@@ -55,6 +57,18 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
       stopAudio();
     }
   }, [currentSlide, isPlaying, voiceoverEnabled]);
+
+  // Show content with animation after slides load
+  useEffect(() => {
+    if (slides.length > 0 && !isLoading) {
+      const timer = setTimeout(() => {
+        setShowContent(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setShowContent(false);
+    }
+  }, [slides, isLoading]);
 
   const playCurrentSlideAudio = () => {
     if (isMuted || !slides[currentSlide]?.audioUrl || !voiceoverEnabled) return;
@@ -109,7 +123,11 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
-      setCurrentSlide(currentSlide + 1);
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentSlide(currentSlide + 1);
+        setIsTransitioning(false);
+      }, 150);
     } else {
       setIsPlaying(false);
     }
@@ -117,7 +135,11 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 
   const prevSlide = () => {
     if (currentSlide > 0) {
-      setCurrentSlide(currentSlide - 1);
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentSlide(currentSlide - 1);
+        setIsTransitioning(false);
+      }, 150);
     }
   };
 
@@ -199,16 +221,23 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           ) : slides.length > 0 ? (
             <Card className="aspect-video bg-gradient-to-br from-gray-900 to-black border-gray-700 shadow-2xl rounded-2xl overflow-hidden">
               <div className="h-full relative">
-                {/* Slide Content */}
-                <div className="h-full flex">
-                  {/* Image Section */}
+                {/* Slide Content with Transition */}
+                <div className={`h-full flex transition-all duration-300 ease-in-out ${
+                  isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'
+                } ${showContent ? 'animate-fade-in' : 'opacity-0'}`}>
+                  {/* Image Section with Glow Effect */}
                   <div className="flex-1 flex items-center justify-center p-8">
                     {slides[currentSlide]?.imageUrl ? (
-                      <img 
-                        src={slides[currentSlide].imageUrl} 
-                        alt={slides[currentSlide].title}
-                        className="max-w-full max-h-full object-contain rounded-xl shadow-lg"
-                      />
+                      <div className={`relative transition-all duration-500 ease-out ${
+                        showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                      }`}>
+                        <div className="absolute -inset-4 bg-white/20 rounded-xl blur-xl animate-pulse" />
+                        <img 
+                          src={slides[currentSlide].imageUrl} 
+                          alt={slides[currentSlide].title}
+                          className="relative max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                        />
+                      </div>
                     ) : (
                       <div className="w-full h-full bg-gray-800 rounded-xl flex items-center justify-center">
                         <p className="text-gray-400">No image available</p>
@@ -218,27 +247,18 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                   
                   {/* Text Section */}
                   <div className="flex-1 p-8 flex flex-col justify-center">
-                    <div className="space-y-6">
+                    <div className={`space-y-6 transition-all duration-500 delay-200 ease-out ${
+                      showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}>
                       <h2 className="text-4xl font-bold text-white leading-tight">
                         {slides[currentSlide]?.title}
                       </h2>
                       
-                      {/* Show detailed explanation text only when voiceover is disabled OR as the main content */}
-                      {voiceoverEnabled ? (
-                        // When voiceover is enabled, show the voiceover script as text content
-                        <div className="space-y-4">
-                          <p className="text-xl text-gray-300 leading-relaxed">
-                            {slides[currentSlide]?.voiceoverScript}
-                          </p>
-                        </div>
-                      ) : (
-                        // When voiceover is disabled, show detailed explanation
-                        <div className="space-y-4">
-                          <p className="text-xl text-gray-300 leading-relaxed">
-                            {slides[currentSlide]?.voiceoverScript}
-                          </p>
-                        </div>
-                      )}
+                      <div className="space-y-4">
+                        <p className="text-xl text-gray-300 leading-relaxed">
+                          {slides[currentSlide]?.voiceoverScript}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -250,7 +270,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                     disabled={currentSlide === 0}
                     variant="ghost"
                     size="sm"
-                    className="text-white hover:bg-white/20 disabled:opacity-30"
+                    className="text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200"
                   >
                     <SkipBack className="w-5 h-5" />
                   </Button>
@@ -259,7 +279,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                     onClick={togglePlay}
                     variant="ghost"
                     size="sm"
-                    className="text-white hover:bg-white/20"
+                    className="text-white hover:bg-white/20 transition-all duration-200"
                   >
                     {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                   </Button>
@@ -269,7 +289,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                       onClick={toggleMute}
                       variant="ghost"
                       size="sm"
-                      className="text-white hover:bg-white/20"
+                      className="text-white hover:bg-white/20 transition-all duration-200"
                     >
                       {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                     </Button>
@@ -280,7 +300,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                     disabled={currentSlide >= slides.length - 1}
                     variant="ghost"
                     size="sm"
-                    className="text-white hover:bg-white/20 disabled:opacity-30"
+                    className="text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200"
                   >
                     <SkipForward className="w-5 h-5" />
                   </Button>
@@ -305,7 +325,9 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 
       {/* Follow-up Section */}
       {!isLoading && slides.length > 0 && (
-        <div className="p-6 bg-gradient-to-t from-black/80 to-transparent">
+        <div className={`p-6 bg-gradient-to-t from-black/80 to-transparent transition-all duration-500 ${
+          showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        }`}>
           <div className="max-w-4xl mx-auto">
             <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700">
               <div className="p-6 space-y-4">
@@ -322,7 +344,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                   <Button 
                     onClick={handleFollowUp}
                     disabled={!followUpQuestion.trim()}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 self-end"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 self-end transition-all duration-200"
                   >
                     <ArrowUp className="w-4 h-4" />
                   </Button>
