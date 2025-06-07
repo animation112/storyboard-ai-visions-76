@@ -25,6 +25,27 @@ export interface GenerateResponse {
   error?: string;
 }
 
+const getStylePrompts = (artStyle?: string) => {
+  switch (artStyle) {
+    case 'dark-surreal':
+      return {
+        narrative: "Use powerful and thought-provoking visual metaphors to tell a story about the topic. The tone should be serious, critical, or reflective.",
+        visuals: `4. Generate an image in a 'Dark Surreal Conceptual Illustration' style for each slide. The style must be:
+   - Metaphorical and Symbolic: Use strong visual metaphors to critique or explore the concept. A phone might be a boot, a light source revealing a skull, etc.
+   - Surrealism: Blend realistic elements with impossible, dreamlike, or nightmarish scenarios to create a striking effect.
+   - Dramatic Lighting: Use high contrast, deep shadows, and dramatic lighting. Light should be a key narrative element, often emanating from a symbolic source like a screen.
+   - Evocative Color Palette: Use a restricted and moody color palette, such as monochromatic purples, stark red/black/white, or somber tones with a single slash of color to establish a powerful atmosphere.
+   - Composition: Use bold, graphic compositions with strong silhouettes for immediate impact.`
+      };
+    case 'cute-minimal-watercolor':
+    default:
+      return {
+        narrative: "2. Use a fun story about lots of tiny, curious cats as a metaphor to explain the concept.",
+        visuals: "4. Generate a cute, minimal illustration for each slide with black ink on a clean white background, with small, soft bits of watercolor."
+      };
+  }
+};
+
 class ApiService {
   private ai: GoogleGenAI;
 
@@ -34,14 +55,17 @@ class ApiService {
 
   async generateExplanation(request: GenerateRequest): Promise<GenerateResponse> {
     try {
+      // Get the dynamic style instructions based on the request
+      const { narrative, visuals } = getStylePrompts(request.artStyle);
+
       const systemPrompt = `Create a comprehensive visual story explanation with these requirements:
 
 CRITICAL: You MUST create EXACTLY 10 slides. This is absolutely essential.
 
 1. Create EXACTLY 10 slides - no more, no less
-2. Use a fun story about lots of tiny cats as a metaphor
+${narrative}
 3. Keep sentences very short but conversational and engaging
-4. Generate a cute, minimal illustration for each slide with black ink on white background, with bits of watercolor
+${visuals}
 5. Focus heavily on visuals - each slide MUST have an image
 6. Maximum 2-3 short sentences per slide content
 7. Always generate images, never just describe them

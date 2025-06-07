@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUp, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowUp, Sparkles, Volume2, VolumeX, Palette } from 'lucide-react';
 
 interface QuerySectionProps {
-  onSubmit: (query: string) => void;
+  onSubmit: (query: string, artStyle?: string) => void;
   isLoading: boolean;
   voiceoverEnabled: boolean;
   onVoiceoverToggle: (enabled: boolean) => void;
@@ -19,10 +20,11 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   onVoiceoverToggle 
 }) => {
   const [query, setQuery] = useState('');
+  const [artStyle, setArtStyle] = useState('cute-minimal-watercolor');
 
   const handleSubmit = () => {
     if (query.trim() && !isLoading) {
-      onSubmit(query.trim());
+      onSubmit(query.trim(), artStyle);
     }
   };
 
@@ -39,6 +41,19 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     "What causes the northern lights?",
     "How does the human immune system work?",
     "Explain quantum entanglement simply"
+  ];
+
+  const artStyles = [
+    {
+      value: 'cute-minimal-watercolor',
+      label: 'Cute Minimal',
+      description: 'Fun cat stories with watercolor illustrations'
+    },
+    {
+      value: 'dark-surreal',
+      label: 'Dark Surreal',
+      description: 'Thought-provoking metaphors with dramatic visuals'
+    }
   ];
 
   return (
@@ -63,11 +78,12 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         </p>
       </div>
 
-      {/* Voiceover Toggle - More Prominent */}
-      <div className="flex justify-center">
+      {/* Options Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Voiceover Toggle */}
         <Card className="bg-gray-900/50 backdrop-blur-sm border-gray-700">
           <div className="p-6">
-            <div className="flex items-center justify-between space-x-6">
+            <div className="flex items-center justify-between space-x-4">
               <div className="flex items-center space-x-3">
                 {voiceoverEnabled ? (
                   <Volume2 className="w-6 h-6 text-green-400" />
@@ -80,8 +96,8 @@ const QuerySection: React.FC<QuerySectionProps> = ({
                   </h3>
                   <p className="text-sm text-gray-400">
                     {voiceoverEnabled 
-                      ? 'Audio narration will be generated for each slide' 
-                      : 'Only detailed text explanations will be shown'
+                      ? 'Audio narration included' 
+                      : 'Text explanations only'
                     }
                   </p>
                 </div>
@@ -94,8 +110,44 @@ const QuerySection: React.FC<QuerySectionProps> = ({
                   : "border-gray-600 text-gray-300 hover:bg-gray-800"
                 }
               >
-                {voiceoverEnabled ? 'Disable Voiceover' : 'Enable Voiceover'}
+                {voiceoverEnabled ? 'On' : 'Off'}
               </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Art Style Selector */}
+        <Card className="bg-gray-900/50 backdrop-blur-sm border-gray-700">
+          <div className="p-6">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex items-center space-x-3">
+                <Palette className="w-6 h-6 text-purple-400" />
+                <div>
+                  <h3 className="text-white font-medium">Visual Style</h3>
+                  <p className="text-sm text-gray-400">
+                    Choose illustration style
+                  </p>
+                </div>
+              </div>
+              <Select value={artStyle} onValueChange={setArtStyle}>
+                <SelectTrigger className="w-40 bg-gray-800 border-gray-600 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-600">
+                  {artStyles.map((style) => (
+                    <SelectItem 
+                      key={style.value} 
+                      value={style.value}
+                      className="text-white hover:bg-gray-700"
+                    >
+                      <div>
+                        <div className="font-medium">{style.label}</div>
+                        <div className="text-xs text-gray-400">{style.description}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </Card>
@@ -164,11 +216,11 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         
         <div className="text-center space-y-3">
           <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto">
-            <div className="w-6 h-6 text-purple-400">🎭</div>
+            <Palette className="w-6 h-6 text-purple-400" />
           </div>
-          <h3 className="text-lg font-semibold text-white">Story-Driven</h3>
+          <h3 className="text-lg font-semibold text-white">Multiple Styles</h3>
           <p className="text-gray-400 text-sm">
-            Complex concepts explained through engaging narratives
+            Choose between cute minimal or dark surreal visual styles
           </p>
         </div>
         

@@ -42,7 +42,7 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [isCharacterActive, showCinema]);
 
-  const handleQuerySubmit = async (query: string) => {
+  const handleQuerySubmit = async (query: string, artStyle?: string) => {
     setIsLoading(true);
     setIsCharacterActive(true);
     setCharacterMessage(voiceoverEnabled ? "Let me create your visual story with voiceover..." : "Let me create your visual story...");
@@ -52,6 +52,7 @@ const Index = () => {
       
       const response = await apiService.generateExplanation({
         prompt: query,
+        artStyle: artStyle,
         voiceoverEnabled: voiceoverEnabled
       });
 
