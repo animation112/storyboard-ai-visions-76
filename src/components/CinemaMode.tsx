@@ -30,6 +30,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   const [voiceoverEnabled, setVoiceoverEnabled] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showContent, setShowContent] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Detect if slides have audio to determine initial voiceover state
@@ -69,6 +70,37 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     }
   }, [slides, isLoading]);
 
+  // Enhanced text highlighting function
+  const highlightText = (text: string) => {
+    // Keywords to highlight with different colors
+    const highlights = {
+      important: ['important', 'crucial', 'key', 'main', 'primary', 'essential', 'critical'],
+      technical: ['algorithm', 'data', 'process', 'system', 'computer', 'AI', 'artificial intelligence', 'neural', 'network'],
+      action: ['learn', 'analyze', 'process', 'understand', 'recognize', 'identify', 'generate', 'create'],
+      emphasis: ['amazing', 'incredible', 'powerful', 'smart', 'intelligent', 'advanced', 'sophisticated']
+    };
+
+    let highlightedText = text;
+    
+    // Apply highlighting for each category
+    Object.entries(highlights).forEach(([category, words]) => {
+      words.forEach(word => {
+        const regex = new RegExp(`\\b(${word})\\b`, 'gi');
+        const colorClass = {
+          important: 'text-yellow-400 font-semibold',
+          technical: 'text-blue-400 font-medium',
+          action: 'text-green-400 font-medium',
+          emphasis: 'text-purple-400 font-semibold'
+        }[category];
+        
+        highlightedText = highlightedText.replace(regex, `<span class="${colorClass}">$1</span>`);
+      });
+    });
+
+    return highlightedText;
+  };
+
+  // Play audio for the current slide
   const playCurrentSlideAudio = () => {
     if (isMuted || !slides[currentSlide]?.audioUrl || !voiceoverEnabled) return;
 
@@ -111,6 +143,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     });
   };
 
+  // Stop audio playback
   const stopAudio = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -120,32 +153,38 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     setIsAudioPlaying(false);
   };
 
+  // Move to the next slide
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
+      setSlideDirection('right');
       setIsTransitioning(true);
       setTimeout(() => {
         setCurrentSlide(currentSlide + 1);
         setIsTransitioning(false);
-      }, 300);
+      }, 250);
     } else {
       setIsPlaying(false);
     }
   };
 
+  // Move to the previous slide
   const prevSlide = () => {
     if (currentSlide > 0) {
+      setSlideDirection('left');
       setIsTransitioning(true);
       setTimeout(() => {
         setCurrentSlide(currentSlide - 1);
         setIsTransitioning(false);
-      }, 300);
+      }, 250);
     }
   };
 
+  // Toggle play/pause
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
 
+  // Toggle mute/unmute
   const toggleMute = () => {
     setIsMuted(!isMuted);
     if (!isMuted) {
@@ -155,6 +194,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     }
   };
 
+  // Handle follow-up question submission
   const handleFollowUp = () => {
     if (followUpQuestion.trim()) {
       stopAudio();
@@ -163,6 +203,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     }
   };
 
+  // Handle keyboard press for follow-up question submission
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -178,7 +219,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col">
+    <div className="fixed inset-0 bg-black z-50 flex flex-col font-pixelify">
       {/* Header Controls */}
       <div className="flex items-center justify-between p-6 bg-gradient-to-b from-black/80 to-transparent relative z-10">
         <div className="flex items-center space-x-4">
@@ -213,31 +254,30 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
       </div>
 
       {/* Main Cinema Screen */}
-      <div className="flex-1 flex items-center justify-center p-8 pb-32 relative">
-        {/* Left Navigation Button */}
+      <div className="flex-1 flex items-center justify-center p-8 pb-32 relative overflow-hidden">
+        {/* Navigation Buttons - Positioned at sides */}
         {!isLoading && slides.length > 0 && (
-          <Button
-            onClick={prevSlide}
-            disabled={currentSlide === 0}
-            variant="ghost"
-            size="lg"
-            className="absolute left-8 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200 z-20 h-16 w-16"
-          >
-            <SkipBack className="w-8 h-8" />
-          </Button>
-        )}
+          <>
+            <Button
+              onClick={prevSlide}
+              disabled={currentSlide === 0}
+              variant="ghost"
+              size="lg"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200 z-20 h-16 w-16"
+            >
+              <SkipBack className="w-8 h-8" />
+            </Button>
 
-        {/* Right Navigation Button */}
-        {!isLoading && slides.length > 0 && (
-          <Button
-            onClick={nextSlide}
-            disabled={currentSlide >= slides.length - 1}
-            variant="ghost"
-            size="lg"
-            className="absolute right-8 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200 z-20 h-16 w-16"
-          >
-            <SkipForward className="w-8 h-8" />
-          </Button>
+            <Button
+              onClick={nextSlide}
+              disabled={currentSlide >= slides.length - 1}
+              variant="ghost"
+              size="lg"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200 z-20 h-16 w-16"
+            >
+              <SkipForward className="w-8 h-8" />
+            </Button>
+          </>
         )}
 
         <div className="w-full max-w-6xl">
@@ -254,33 +294,35 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
               </div>
             </div>
           ) : slides.length > 0 ? (
-            <div 
-              className="aspect-[4/3] relative overflow-hidden cursor-pointer"
-              onClick={togglePlay}
-            >
-              {/* Content Container with 3D movement and slide transitions */}
-              <div className={`h-full flex flex-col transition-all duration-500 ease-out transform-gpu ${
-                isTransitioning 
-                  ? 'translate-x-full opacity-0' 
-                  : 'translate-x-0 opacity-100'
-              } ${showContent ? 'animate-fade-in' : 'opacity-0'} hover:scale-[1.02] hover:rotateY-1 hover:rotateX-1`}
-              style={{
-                transformStyle: 'preserve-3d',
-                perspective: '1000px'
-              }}>
+            <div className="aspect-[4/3] relative overflow-hidden">
+              {/* Slide Container with enhanced transitions */}
+              <div 
+                className={`h-full flex flex-col transition-all duration-500 ease-out transform-gpu cursor-pointer ${
+                  isTransitioning 
+                    ? slideDirection === 'right' 
+                      ? 'animate-slide-out-left' 
+                      : 'translate-x-full opacity-0'
+                    : 'translate-x-0 opacity-100'
+                } ${showContent ? 'animate-fade-in' : 'opacity-0'} hover:scale-[1.02]`}
+                onClick={togglePlay}
+                style={{
+                  transformStyle: 'preserve-3d',
+                  perspective: '1000px'
+                }}
+              >
                 
-                {/* Title Section - Top */}
+                {/* Title Section */}
                 <div className="px-8 pt-8 pb-4 z-10">
                   <div className={`transition-all duration-500 ease-out ${
                     showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
                   }`}>
-                    <h2 className="text-4xl font-bold text-white text-center leading-tight drop-shadow-lg">
+                    <h2 className="text-4xl font-bold text-white text-center leading-tight drop-shadow-lg font-pixelify">
                       {slides[currentSlide]?.title}
                     </h2>
                   </div>
                 </div>
                 
-                {/* Visual Section - Middle */}
+                {/* Visual Section */}
                 <div className="flex-1 flex items-center justify-center px-8 z-10">
                   {slides[currentSlide]?.imageUrl ? (
                     <div className={`relative transition-all duration-500 delay-200 ease-out transform-gpu ${
@@ -308,17 +350,60 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                   )}
                 </div>
                 
-                {/* Text Section - Bottom */}
+                {/* Text Section with highlighting */}
                 <div className="px-8 pb-8 pt-4 z-10">
                   <div className={`transition-all duration-500 delay-400 ease-out ${
                     showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                   }`}>
-                    <p className="text-lg text-gray-300 leading-relaxed text-center max-w-4xl mx-auto drop-shadow-md">
-                      {slides[currentSlide]?.voiceoverScript}
-                    </p>
+                    <p 
+                      className="text-lg text-gray-300 leading-relaxed text-center max-w-4xl mx-auto drop-shadow-md font-pixelify"
+                      dangerouslySetInnerHTML={{ 
+                        __html: highlightText(slides[currentSlide]?.voiceoverScript || '') 
+                      }}
+                    />
                   </div>
                 </div>
               </div>
+
+              {/* Incoming slide for smooth transition */}
+              {isTransitioning && (
+                <div 
+                  className={`absolute inset-0 h-full flex flex-col transition-all duration-500 ease-out transform-gpu ${
+                    slideDirection === 'right' ? 'animate-slide-in-right' : '-translate-x-full opacity-0'
+                  }`}
+                  style={{
+                    transformStyle: 'preserve-3d',
+                    perspective: '1000px'
+                  }}
+                >
+                  {/* Preview of next slide content */}
+                  <div className="px-8 pt-8 pb-4 z-10">
+                    <h2 className="text-4xl font-bold text-white text-center leading-tight drop-shadow-lg font-pixelify">
+                      {slides[slideDirection === 'right' ? currentSlide + 1 : currentSlide - 1]?.title}
+                    </h2>
+                  </div>
+                  
+                  <div className="flex-1 flex items-center justify-center px-8 z-10">
+                    {slides[slideDirection === 'right' ? currentSlide + 1 : currentSlide - 1]?.imageUrl && (
+                      <img 
+                        src={slides[slideDirection === 'right' ? currentSlide + 1 : currentSlide - 1].imageUrl} 
+                        alt={slides[slideDirection === 'right' ? currentSlide + 1 : currentSlide - 1].title}
+                        className="relative max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                        style={{ maxHeight: '60vh' }}
+                      />
+                    )}
+                  </div>
+                  
+                  <div className="px-8 pb-8 pt-4 z-10">
+                    <p 
+                      className="text-lg text-gray-300 leading-relaxed text-center max-w-4xl mx-auto drop-shadow-md font-pixelify"
+                      dangerouslySetInnerHTML={{ 
+                        __html: highlightText(slides[slideDirection === 'right' ? currentSlide + 1 : currentSlide - 1]?.voiceoverScript || '') 
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Progress Bar */}
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800 z-20">
@@ -344,14 +429,14 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           <div className="max-w-4xl mx-auto">
             <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700">
               <div className="p-6 space-y-4">
-                <h3 className="text-lg font-semibold text-white">Continue the story</h3>
+                <h3 className="text-lg font-semibold text-white font-pixelify">Continue the story</h3>
                 <div className="flex space-x-4">
                   <Textarea
                     value={followUpQuestion}
                     onChange={(e) => setFollowUpQuestion(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask for more details or explore another aspect..."
-                    className="flex-1 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 resize-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 resize-none focus:ring-2 focus:ring-blue-500 font-pixelify"
                     rows={2}
                   />
                   <Button 
