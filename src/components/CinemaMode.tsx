@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -127,7 +126,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
       setTimeout(() => {
         setCurrentSlide(currentSlide + 1);
         setIsTransitioning(false);
-      }, 150);
+      }, 300);
     } else {
       setIsPlaying(false);
     }
@@ -139,7 +138,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
       setTimeout(() => {
         setCurrentSlide(currentSlide - 1);
         setIsTransitioning(false);
-      }, 150);
+      }, 300);
     }
   };
 
@@ -204,10 +203,10 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
       </div>
 
       {/* Main Cinema Screen */}
-      <div className="flex-1 flex items-center justify-center p-8">
+      <div className="flex-1 flex items-center justify-center p-8 pb-32">
         <div className="w-full max-w-6xl">
           {isLoading ? (
-            <div className="aspect-[4/3] bg-gray-900 rounded-2xl flex items-center justify-center">
+            <div className="aspect-[4/3] flex items-center justify-center">
               <div className="text-center space-y-6">
                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
                 <p className="text-white text-2xl font-medium">
@@ -219,116 +218,121 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
               </div>
             </div>
           ) : slides.length > 0 ? (
-            <Card className="aspect-[4/3] bg-gradient-to-br from-gray-900 to-black border-gray-700 shadow-2xl rounded-2xl overflow-hidden">
-              <div className="h-full relative flex flex-col">
-                {/* Slide Content with New Layout */}
-                <div className={`h-full flex flex-col transition-all duration-300 ease-in-out ${
-                  isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'
-                } ${showContent ? 'animate-fade-in' : 'opacity-0'}`}>
-                  
-                  {/* Title Section - Top */}
-                  <div className="px-8 pt-8 pb-4">
-                    <div className={`transition-all duration-500 ease-out ${
-                      showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-                    }`}>
-                      <h2 className="text-3xl font-bold text-white text-center leading-tight">
-                        {slides[currentSlide]?.title}
-                      </h2>
-                    </div>
-                  </div>
-                  
-                  {/* Visual Section - Middle (takes most space) */}
-                  <div className="flex-1 flex items-center justify-center px-8">
-                    {slides[currentSlide]?.imageUrl ? (
-                      <div className={`relative transition-all duration-500 delay-200 ease-out ${
-                        showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                      }`}>
-                        <div className="absolute -inset-4 bg-white/10 rounded-xl blur-xl animate-pulse" />
-                        <img 
-                          src={slides[currentSlide].imageUrl} 
-                          alt={slides[currentSlide].title}
-                          className="relative max-w-full max-h-full object-contain rounded-xl shadow-2xl"
-                          style={{ maxHeight: '60vh' }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-full h-64 bg-gray-800 rounded-xl flex items-center justify-center">
-                        <p className="text-gray-400">No image available</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Text Section - Bottom */}
-                  <div className="px-8 pb-8 pt-4">
-                    <div className={`transition-all duration-500 delay-400 ease-out ${
-                      showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                    }`}>
-                      <p className="text-lg text-gray-300 leading-relaxed text-center max-w-4xl mx-auto">
-                        {slides[currentSlide]?.voiceoverScript}
-                      </p>
-                    </div>
+            <div className="aspect-[4/3] relative overflow-hidden">
+              {/* Content Container with 3D movement and slide transitions */}
+              <div className={`h-full flex flex-col transition-all duration-500 ease-out transform-gpu ${
+                isTransitioning 
+                  ? 'translate-x-full opacity-0' 
+                  : 'translate-x-0 opacity-100'
+              } ${showContent ? 'animate-fade-in' : 'opacity-0'} hover:scale-[1.02] hover:rotateY-1 hover:rotateX-1`}
+              style={{
+                transformStyle: 'preserve-3d',
+                perspective: '1000px'
+              }}>
+                
+                {/* Title Section - Top */}
+                <div className="px-8 pt-8 pb-4 z-10">
+                  <div className={`transition-all duration-500 ease-out ${
+                    showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+                  }`}>
+                    <h2 className="text-4xl font-bold text-white text-center leading-tight drop-shadow-lg">
+                      {slides[currentSlide]?.title}
+                    </h2>
                   </div>
                 </div>
-
-                {/* Navigation Controls */}
-                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 bg-black/50 backdrop-blur-sm rounded-full px-6 py-3">
-                  <Button
-                    onClick={prevSlide}
-                    disabled={currentSlide === 0}
-                    variant="ghost"
-                    size="sm"
-                    className="text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200"
-                  >
-                    <SkipBack className="w-5 h-5" />
-                  </Button>
-                  
-                  <Button
-                    onClick={togglePlay}
-                    variant="ghost"
-                    size="sm"
-                    className="text-white hover:bg-white/20 transition-all duration-200"
-                  >
-                    {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                  </Button>
-                  
-                  {voiceoverEnabled && (
-                    <Button
-                      onClick={toggleMute}
-                      variant="ghost"
-                      size="sm"
-                      className="text-white hover:bg-white/20 transition-all duration-200"
-                    >
-                      {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                    </Button>
+                
+                {/* Visual Section - Middle (no background platform) */}
+                <div className="flex-1 flex items-center justify-center px-8 z-10">
+                  {slides[currentSlide]?.imageUrl ? (
+                    <div className={`relative transition-all duration-500 delay-200 ease-out transform-gpu ${
+                      showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                    }`}>
+                      <img 
+                        src={slides[currentSlide].imageUrl} 
+                        alt={slides[currentSlide].title}
+                        className="relative max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                        style={{ maxHeight: '60vh' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-64 flex items-center justify-center">
+                      <p className="text-gray-400">No image available</p>
+                    </div>
                   )}
-                  
-                  <Button
-                    onClick={nextSlide}
-                    disabled={currentSlide >= slides.length - 1}
-                    variant="ghost"
-                    size="sm"
-                    className="text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200"
-                  >
-                    <SkipForward className="w-5 h-5" />
-                  </Button>
                 </div>
-
-                {/* Progress Bar */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800">
-                  <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 ease-out"
-                    style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
-                  />
+                
+                {/* Text Section - Bottom */}
+                <div className="px-8 pb-8 pt-4 z-10">
+                  <div className={`transition-all duration-500 delay-400 ease-out ${
+                    showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  }`}>
+                    <p className="text-lg text-gray-300 leading-relaxed text-center max-w-4xl mx-auto drop-shadow-md">
+                      {slides[currentSlide]?.voiceoverScript}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </Card>
+
+              {/* Progress Bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800 z-20">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 ease-out"
+                  style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
+                />
+              </div>
+            </div>
           ) : (
-            <div className="aspect-[4/3] bg-gray-900 rounded-2xl flex items-center justify-center">
+            <div className="aspect-[4/3] flex items-center justify-center">
               <p className="text-white text-xl">No slides generated yet</p>
             </div>
           )}
         </div>
       </div>
+
+      {/* Fixed Navigation Controls - Positioned to avoid overlap */}
+      {!isLoading && slides.length > 0 && (
+        <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 bg-black/70 backdrop-blur-sm rounded-full px-6 py-3 z-30">
+          <Button
+            onClick={prevSlide}
+            disabled={currentSlide === 0}
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200"
+          >
+            <SkipBack className="w-5 h-5" />
+          </Button>
+          
+          <Button
+            onClick={togglePlay}
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/20 transition-all duration-200"
+          >
+            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+          </Button>
+          
+          {voiceoverEnabled && (
+            <Button
+              onClick={toggleMute}
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/20 transition-all duration-200"
+            >
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </Button>
+          )}
+          
+          <Button
+            onClick={nextSlide}
+            disabled={currentSlide >= slides.length - 1}
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200"
+          >
+            <SkipForward className="w-5 h-5" />
+          </Button>
+        </div>
+      )}
 
       {/* Follow-up Section */}
       {!isLoading && slides.length > 0 && (
