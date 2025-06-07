@@ -53,6 +53,11 @@ const QuerySection: React.FC<QuerySectionProps> = ({
       value: 'dark-surreal',
       label: 'Conceptual Commentary',
       description: 'Social commentary through symbolic illustrations'
+    },
+    {
+      value: 'atmospheric-gradient-grain',
+      label: 'Atmospheric Gradient',
+      description: 'Dreamy, textured illustrations with dramatic lighting'
     }
   ];
 

@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Modality } from "@google/genai";
 import { ttsService } from './ttsService';
 
@@ -27,6 +28,17 @@ export interface GenerateResponse {
 
 const getStylePrompts = (artStyle?: string) => {
   switch (artStyle) {
+    case 'atmospheric-gradient-grain':
+      return {
+        narrative: "Use simple, archetypal characters and minimalist scenes as a metaphor to explore the concept's emotional or atmospheric core.",
+        visuals: `4. Generate an image in a 'Modern Gradient & Grain Illustration' style for each slide. The style must have:
+   - Heavy Grain & Airbrush Texture: The entire image must have a prominent, tactile grain or stipple texture, giving it an organic, analog feel.
+   - Luminous Gradients: Use soft, dithered gradients to create a sense of glowing light and atmosphere.
+   - Minimalist & Abstract Forms: Subjects should be simplified into bold, soft silhouettes or geometric shapes. Avoid fine details.
+   - Dramatic Lighting: Use high contrast between light and shadow. Light should appear to glow, carving forms out of deep, dark backgrounds.
+   - Atmospheric Mood: The overall feeling should be dreamlike, mysterious, and contemplative. Focus on emotion over narrative detail.
+   - Vibrant & Muted Palettes: Use deliberate color schemes with deep blues/purples contrasted with warm yellows/pinks/oranges.`
+      };
     case 'dark-surreal':
       return {
         narrative: "Use powerful conceptual metaphors and social commentary to explore the deeper implications of the topic. Focus on thought-provoking themes, societal impact, and philosophical questions.",
