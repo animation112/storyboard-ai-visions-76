@@ -14,19 +14,20 @@ def install_requirements():
 
 def setup_environment():
     """Setup environment variables"""
-    env_example = """
-# Copy this to .env and fill in your actual API key
-GEMINI_API_KEY=your_gemini_api_key_here
+    env_content = """# Gemini API Configuration
+GEMINI_API_KEY=AIzaSyDMwNHMeZVWmf0Wtc9BQSsY4mks2yd0aAg
 """
     
     with open(".env.example", "w") as f:
-        f.write(env_example)
+        f.write(env_content)
     
     if not os.path.exists(".env"):
         print("Creating .env file...")
         with open(".env", "w") as f:
-            f.write(env_example)
-        print("Please edit .env file and add your Gemini API key")
+            f.write(env_content)
+        print(".env file created with API key")
+    else:
+        print(".env file already exists")
 
 def main():
     print("Setting up Visual AI Explainer backend...")
@@ -41,9 +42,8 @@ def main():
     
     print("\nSetup complete!")
     print("Next steps:")
-    print("1. Edit .env file and add your Gemini API key")
-    print("2. Run: python main.py")
-    print("3. The API will be available at http://localhost:8000")
+    print("1. Run: python main.py")
+    print("2. The API will be available at http://localhost:8000")
 
 if __name__ == "__main__":
     main()

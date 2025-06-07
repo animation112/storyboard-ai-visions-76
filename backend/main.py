@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -12,6 +11,11 @@ from google.genai import types
 from PIL import Image
 import json
 import re
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI(title="Visual AI Explainer API")
 
@@ -25,7 +29,7 @@ app.add_middleware(
 )
 
 # Initialize Gemini client
-client = genai.Client()
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 class GenerateRequest(BaseModel):
     prompt: str
