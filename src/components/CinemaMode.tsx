@@ -154,7 +154,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           {!isLoading && slides.length > 0 && (
             <div className="text-gray-300 flex items-center space-x-2">
               <span>{currentSlide + 1} of {slides.length}</span>
-              {isAudioPlaying && <Volume2 className="w-4 h-4 text-green-400 animate-pulse" />}
+              {isAudioPlaying && <Volume2 className="w-4 h-4 text-green-400" />}
             </div>
           )}
         </div>
@@ -168,9 +168,9 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
         </Button>
       </div>
 
-      {/* Main Cinema Screen - Full Visual Focus */}
+      {/* Main Cinema Screen */}
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-6xl h-full">
+        <div className="w-full max-w-7xl">
           {isLoading ? (
             <div className="aspect-video bg-gray-900 rounded-2xl flex items-center justify-center">
               <div className="text-center space-y-6">
@@ -180,104 +180,96 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
               </div>
             </div>
           ) : slides.length > 0 ? (
-            <div className="h-full relative">
-              {/* Full Screen Image with Glow and Animation */}
-              <div className="h-full flex items-center justify-center relative">
-                {slides[currentSlide]?.imageUrl ? (
-                  <div className="relative group">
-                    {/* Animated glow effect */}
-                    <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl opacity-75 group-hover:opacity-100 animate-pulse blur-xl transition-all duration-1000"></div>
-                    <div className="absolute -inset-2 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 rounded-2xl opacity-50 animate-pulse blur-lg transition-all duration-700"></div>
-                    
-                    {/* Main image with floating animation */}
-                    <img 
-                      src={slides[currentSlide].imageUrl} 
-                      alt={slides[currentSlide].title}
-                      className="relative max-w-full max-h-[70vh] object-contain rounded-2xl shadow-2xl transform transition-all duration-1000 hover:scale-105 animate-[float_3s_ease-in-out_infinite]"
-                      style={{
-                        filter: 'drop-shadow(0 25px 50px rgba(0, 0, 0, 0.5))',
-                      }}
-                    />
-                    
-                    {/* Floating particles around image */}
-                    <div className="absolute inset-0 pointer-events-none">
-                      {Array.from({ length: 8 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="absolute w-2 h-2 bg-white rounded-full opacity-40 animate-ping"
-                          style={{
-                            left: `${20 + (i * 15)}%`,
-                            top: `${10 + (i % 3) * 30}%`,
-                            animationDelay: `${i * 0.5}s`,
-                            animationDuration: `${2 + (i % 3)}s`
-                          }}
-                        />
-                      ))}
+            <Card className="aspect-video bg-gradient-to-br from-gray-900 to-black border-gray-700 shadow-2xl rounded-2xl overflow-hidden">
+              <div className="h-full relative">
+                {/* Slide Content */}
+                <div className="h-full flex">
+                  {/* Image Section */}
+                  <div className="flex-1 flex items-center justify-center p-8">
+                    {slides[currentSlide]?.imageUrl ? (
+                      <img 
+                        src={slides[currentSlide].imageUrl} 
+                        alt={slides[currentSlide].title}
+                        className="max-w-full max-h-full object-contain rounded-xl shadow-lg"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-800 rounded-xl flex items-center justify-center">
+                        <p className="text-gray-400">No image available</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Text Section */}
+                  <div className="flex-1 p-8 flex flex-col justify-center">
+                    <div className="space-y-6">
+                      <h2 className="text-4xl font-bold text-white leading-tight">
+                        {slides[currentSlide]?.title}
+                      </h2>
+                      <p className="text-xl text-gray-300 leading-relaxed">
+                        {slides[currentSlide]?.content}
+                      </p>
+                      {slides[currentSlide]?.voiceoverScript && (
+                        <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
+                          <p className="text-sm text-gray-400 mb-2">Voiceover Script:</p>
+                          <p className="text-sm text-gray-300 italic">
+                            {slides[currentSlide].voiceoverScript}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl flex items-center justify-center">
-                    <p className="text-gray-400 text-xl">No image available</p>
-                  </div>
-                )}
-              </div>
+                </div>
 
-              {/* Subtle title overlay */}
-              <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-10">
-                <h2 className="text-3xl font-bold text-white text-center bg-black/30 backdrop-blur-sm px-6 py-3 rounded-full">
-                  {slides[currentSlide]?.title}
-                </h2>
-              </div>
+                {/* Navigation Controls */}
+                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 bg-black/50 backdrop-blur-sm rounded-full px-6 py-3">
+                  <Button
+                    onClick={prevSlide}
+                    disabled={currentSlide === 0}
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20 disabled:opacity-30"
+                  >
+                    <SkipBack className="w-5 h-5" />
+                  </Button>
+                  
+                  <Button
+                    onClick={togglePlay}
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20"
+                  >
+                    {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                  </Button>
+                  
+                  <Button
+                    onClick={toggleMute}
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20"
+                  >
+                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </Button>
+                  
+                  <Button
+                    onClick={nextSlide}
+                    disabled={currentSlide >= slides.length - 1}
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20 disabled:opacity-30"
+                  >
+                    <SkipForward className="w-5 h-5" />
+                  </Button>
+                </div>
 
-              {/* Navigation Controls */}
-              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 bg-black/50 backdrop-blur-sm rounded-full px-6 py-3">
-                <Button
-                  onClick={prevSlide}
-                  disabled={currentSlide === 0}
-                  variant="ghost"
-                  size="sm"
-                  className="text-white hover:bg-white/20 disabled:opacity-30"
-                >
-                  <SkipBack className="w-5 h-5" />
-                </Button>
-                
-                <Button
-                  onClick={togglePlay}
-                  variant="ghost"
-                  size="sm"
-                  className="text-white hover:bg-white/20"
-                >
-                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                </Button>
-                
-                <Button
-                  onClick={toggleMute}
-                  variant="ghost"
-                  size="sm"
-                  className="text-white hover:bg-white/20"
-                >
-                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                </Button>
-                
-                <Button
-                  onClick={nextSlide}
-                  disabled={currentSlide >= slides.length - 1}
-                  variant="ghost"
-                  size="sm"
-                  className="text-white hover:bg-white/20 disabled:opacity-30"
-                >
-                  <SkipForward className="w-5 h-5" />
-                </Button>
+                {/* Progress Bar */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 ease-out"
+                    style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
+                  />
+                </div>
               </div>
-
-              {/* Progress Bar */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800">
-                <div 
-                  className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-300 ease-out"
-                  style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
-                />
-              </div>
-            </div>
+            </Card>
           ) : (
             <div className="aspect-video bg-gray-900 rounded-2xl flex items-center justify-center">
               <p className="text-white text-xl">No slides generated yet</p>
