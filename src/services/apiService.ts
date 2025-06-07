@@ -33,28 +33,31 @@ class ApiService {
 
   async generateExplanation(request: GenerateRequest): Promise<GenerateResponse> {
     try {
-      const systemPrompt = `Create a visual story explanation with these requirements:
+      const systemPrompt = `Create a comprehensive visual story explanation with these requirements:
 
-1. Use a fun story about lots of tiny cats as a metaphor
-2. Keep sentences very short but conversational and engaging
-3. Generate a cute, minimal illustration for each sentence with black ink on white background, with bits of watercolor
-4. Focus heavily on visuals - each slide should have an image
-5. Maximum 2-3 short sentences per slide
-6. Create 5-7 slides total
+1. Create EXACTLY 10 slides - this is very important
+2. Use a fun story about lots of tiny cats as a metaphor
+3. Keep sentences very short but conversational and engaging
+4. Generate a cute, minimal illustration for each sentence with black ink on white background, with bits of watercolor
+5. Focus heavily on visuals - each slide MUST have an image
+6. Maximum 2-3 short sentences per slide content
 7. Always generate images, never just describe them
 8. Make it cinematic and story-driven
+9. Each slide must have a detailed voiceover script (3-4 sentences that explain the concept in depth)
 
 For each slide, provide:
 - A short catchy title
-- Brief visual content (1-2 sentences)
-- A detailed voiceover script (2-3 sentences that explain the concept in depth, as the image is just supporting the explanation)
+- Brief visual content (1-2 sentences for the slide display)
+- A detailed voiceover script (3-4 sentences explaining the concept in depth, as the image is supporting the explanation)
 
 Format each slide as:
 Slide [number]: [Short catchy title]
 Visual: [1-2 very short sentences for the slide]
-Voiceover: [2-3 detailed sentences explaining the concept in depth]
+Voiceover: [3-4 detailed sentences explaining the concept in depth]
 
-Then generate the corresponding illustration.`;
+You MUST create exactly 10 slides. Then generate the corresponding illustration for each slide.
+
+IMPORTANT: Generate 10 images total - one for each slide.`;
 
       const response = await this.ai.models.generateContent({
         model: "gemini-2.0-flash-preview-image-generation",
@@ -108,18 +111,9 @@ Then generate the corresponding illustration.`;
         }
       }
 
-      if (currentText.trim() && slides.length === 0) {
-        const lines = currentText.trim().split('\n').filter(line => line.trim());
-        const title = lines[0] || `Slide ${slideCounter + 1}`;
-        const content = lines.slice(1).join('\n') || currentText;
-        
-        slides.push({
-          id: `slide-${slideCounter}`,
-          title: title.replace(/^#+\s*/, ''),
-          content: content,
-          commentary: content,
-          voiceoverScript: content
-        });
+      // Check if we have enough slides
+      if (slides.length < 5) {
+        throw new Error(`Failed to generate enough slides. Only generated ${slides.length} slides, expected at least 10.`);
       }
 
       // Generate audio for all slides
@@ -132,7 +126,7 @@ Then generate the corresponding illustration.`;
         slide.audioUrl = audioUrls[index];
       });
 
-      console.log('All audio generated successfully');
+      console.log(`Successfully generated ${slides.length} slides with audio`);
 
       return {
         slides,
@@ -145,7 +139,7 @@ Then generate the corresponding illustration.`;
         slides: [],
         refinedPrompt: '',
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? `Failed to generate: ${error.message}` : 'Failed to generate explanation - please try again'
       };
     }
   }
