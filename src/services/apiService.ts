@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Modality } from "@google/genai";
 
 export interface GenerateRequest {
@@ -31,23 +30,22 @@ class ApiService {
 
   async generateExplanation(request: GenerateRequest): Promise<GenerateResponse> {
     try {
-      const systemPrompt = `I will name a task. Come up with an unexpected, absurd, fun method to complete that task. Then pretend you're giving a slideshow presentation pitching me on your method. Be a gripping narrator. Be clever, conversational, and very concise.
+      const systemPrompt = `Create a visual story explanation with these requirements:
 
-Give your method a fun name and explain it in 5 clear steps with very short sentences. At the end of your presentation, suggest to me that I can ask you to solve another task.
+1. Use a fun story about lots of tiny cats as a metaphor
+2. Keep sentences very short but conversational and engaging
+3. Generate a cute, minimal illustration for each sentence with black ink on white background, with bits of watercolor
+4. Focus heavily on visuals - each slide should have an image
+5. Maximum 2-3 short sentences per slide
+6. Create 5-7 slides total
+7. Always generate images, never just describe them
+8. Make it cinematic and story-driven
 
-Illustrate the slides with minimal, black ink on white background, with bits of watercolor. Always generate images, never just describe them.
+Format each slide as:
+Slide [number]: [Short catchy title]
+[1-2 very short sentences explaining one concept]
 
-Use markdown formatting and intersperse your commentary between slides like this:
-
-Slide 1: Title
-
-Some commentary to be spoken over the slide...
-
-Slide 2: Title
-
-Further commentary to be spoken over slide 2...
-
-etc`;
+Then generate the corresponding illustration.`;
 
       const response = await this.ai.models.generateContent({
         model: "gemini-2.0-flash-preview-image-generation",
@@ -65,20 +63,19 @@ etc`;
         if (part.text) {
           currentText += part.text;
         } else if (part.inlineData) {
-          // Create a slide when we have both text and image
           const imageUrl = `data:image/png;base64,${part.inlineData.data}`;
           
-          // Parse the text to extract title and content
           const lines = currentText.trim().split('\n').filter(line => line.trim());
-          const title = lines[0] || `Slide ${slideCounter + 1}`;
-          const content = lines.slice(1).join('\n') || currentText;
+          const titleLine = lines.find(line => line.includes('Slide')) || `Slide ${slideCounter + 1}`;
+          const title = titleLine.replace(/^Slide \d+:\s*/, '').replace(/^#+\s*/, '');
+          const content = lines.filter(line => !line.includes('Slide')).join(' ').trim() || currentText;
           
           slides.push({
             id: `slide-${slideCounter}`,
-            title: title.replace(/^#+\s*/, ''), // Remove markdown headers
+            title: title || `Step ${slideCounter + 1}`,
             content: content,
             imageUrl: imageUrl,
-            commentary: content // Use content as commentary for now
+            commentary: content
           });
 
           slideCounter++;
@@ -86,8 +83,7 @@ etc`;
         }
       }
 
-      // If there's remaining text without an image, create a text-only slide
-      if (currentText.trim()) {
+      if (currentText.trim() && slides.length === 0) {
         const lines = currentText.trim().split('\n').filter(line => line.trim());
         const title = lines[0] || `Slide ${slideCounter + 1}`;
         const content = lines.slice(1).join('\n') || currentText;
