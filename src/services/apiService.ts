@@ -29,13 +29,14 @@ const getStylePrompts = (artStyle?: string) => {
   switch (artStyle) {
     case 'dark-surreal':
       return {
-        narrative: "Use powerful and thought-provoking visual metaphors to tell a story about the topic. The tone should be serious, critical, or reflective.",
-        visuals: `4. Generate an image in a 'Dark Surreal Conceptual Illustration' style for each slide. The style must be:
-   - Metaphorical and Symbolic: Use strong visual metaphors to critique or explore the concept. A phone might be a boot, a light source revealing a skull, etc.
-   - Surrealism: Blend realistic elements with impossible, dreamlike, or nightmarish scenarios to create a striking effect.
-   - Dramatic Lighting: Use high contrast, deep shadows, and dramatic lighting. Light should be a key narrative element, often emanating from a symbolic source like a screen.
-   - Evocative Color Palette: Use a restricted and moody color palette, such as monochromatic purples, stark red/black/white, or somber tones with a single slash of color to establish a powerful atmosphere.
-   - Composition: Use bold, graphic compositions with strong silhouettes for immediate impact.`
+        narrative: "Use powerful conceptual metaphors and social commentary to explore the deeper implications of the topic. Focus on thought-provoking themes, societal impact, and philosophical questions.",
+        visuals: `4. Generate an image in a 'Conceptual Social Commentary Illustration' style for each slide. The style must be:
+   - Conceptual and Symbolic: Use abstract visual metaphors that represent ideas rather than literal objects. Think of concepts like surveillance as eyes in screens, social media as puppet strings, or technology as growing vines consuming nature.
+   - Social Commentary: Critique or explore societal themes, power structures, human behavior, and cultural phenomena through visual storytelling.
+   - Graphic Illustration Style: Clean, bold graphic illustrations with strong symbolic elements rather than photorealistic imagery.
+   - Meaningful Color Psychology: Use intentional color choices - cool blues for technology/isolation, warm reds for danger/emotion, stark black and white for contrast/conflict, muted tones for dystopian themes.
+   - Minimalist Composition: Focus on one central powerful metaphor per image with clean, uncluttered compositions that communicate the concept clearly.
+   - Editorial Art Aesthetic: Think magazine editorial illustrations, protest art, or infographic-style visuals that convey complex ideas simply.`
       };
     case 'cute-minimal-watercolor':
     default:

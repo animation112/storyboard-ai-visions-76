@@ -51,8 +51,8 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     },
     {
       value: 'dark-surreal',
-      label: 'Dark Surreal',
-      description: 'Thought-provoking metaphors with dramatic visuals'
+      label: 'Conceptual Commentary',
+      description: 'Social commentary through symbolic illustrations'
     }
   ];
 

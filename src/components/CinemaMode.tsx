@@ -205,9 +205,9 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 
       {/* Main Cinema Screen */}
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-7xl">
+        <div className="w-full max-w-6xl">
           {isLoading ? (
-            <div className="aspect-video bg-gray-900 rounded-2xl flex items-center justify-center">
+            <div className="aspect-[4/3] bg-gray-900 rounded-2xl flex items-center justify-center">
               <div className="text-center space-y-6">
                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
                 <p className="text-white text-2xl font-medium">
@@ -219,46 +219,53 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
               </div>
             </div>
           ) : slides.length > 0 ? (
-            <Card className="aspect-video bg-gradient-to-br from-gray-900 to-black border-gray-700 shadow-2xl rounded-2xl overflow-hidden">
-              <div className="h-full relative">
-                {/* Slide Content with Transition */}
-                <div className={`h-full flex transition-all duration-300 ease-in-out ${
+            <Card className="aspect-[4/3] bg-gradient-to-br from-gray-900 to-black border-gray-700 shadow-2xl rounded-2xl overflow-hidden">
+              <div className="h-full relative flex flex-col">
+                {/* Slide Content with New Layout */}
+                <div className={`h-full flex flex-col transition-all duration-300 ease-in-out ${
                   isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'
                 } ${showContent ? 'animate-fade-in' : 'opacity-0'}`}>
-                  {/* Image Section with Glow Effect */}
-                  <div className="flex-1 flex items-center justify-center p-8">
+                  
+                  {/* Title Section - Top */}
+                  <div className="px-8 pt-8 pb-4">
+                    <div className={`transition-all duration-500 ease-out ${
+                      showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+                    }`}>
+                      <h2 className="text-3xl font-bold text-white text-center leading-tight">
+                        {slides[currentSlide]?.title}
+                      </h2>
+                    </div>
+                  </div>
+                  
+                  {/* Visual Section - Middle (takes most space) */}
+                  <div className="flex-1 flex items-center justify-center px-8">
                     {slides[currentSlide]?.imageUrl ? (
-                      <div className={`relative transition-all duration-500 ease-out ${
+                      <div className={`relative transition-all duration-500 delay-200 ease-out ${
                         showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
                       }`}>
-                        <div className="absolute -inset-4 bg-white/20 rounded-xl blur-xl animate-pulse" />
+                        <div className="absolute -inset-4 bg-white/10 rounded-xl blur-xl animate-pulse" />
                         <img 
                           src={slides[currentSlide].imageUrl} 
                           alt={slides[currentSlide].title}
                           className="relative max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                          style={{ maxHeight: '60vh' }}
                         />
                       </div>
                     ) : (
-                      <div className="w-full h-full bg-gray-800 rounded-xl flex items-center justify-center">
+                      <div className="w-full h-64 bg-gray-800 rounded-xl flex items-center justify-center">
                         <p className="text-gray-400">No image available</p>
                       </div>
                     )}
                   </div>
                   
-                  {/* Text Section */}
-                  <div className="flex-1 p-8 flex flex-col justify-center">
-                    <div className={`space-y-6 transition-all duration-500 delay-200 ease-out ${
+                  {/* Text Section - Bottom */}
+                  <div className="px-8 pb-8 pt-4">
+                    <div className={`transition-all duration-500 delay-400 ease-out ${
                       showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                     }`}>
-                      <h2 className="text-4xl font-bold text-white leading-tight">
-                        {slides[currentSlide]?.title}
-                      </h2>
-                      
-                      <div className="space-y-4">
-                        <p className="text-xl text-gray-300 leading-relaxed">
-                          {slides[currentSlide]?.voiceoverScript}
-                        </p>
-                      </div>
+                      <p className="text-lg text-gray-300 leading-relaxed text-center max-w-4xl mx-auto">
+                        {slides[currentSlide]?.voiceoverScript}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -316,7 +323,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
               </div>
             </Card>
           ) : (
-            <div className="aspect-video bg-gray-900 rounded-2xl flex items-center justify-center">
+            <div className="aspect-[4/3] bg-gray-900 rounded-2xl flex items-center justify-center">
               <p className="text-white text-xl">No slides generated yet</p>
             </div>
           )}
