@@ -1,21 +1,29 @@
 
 import React, { useState } from 'react';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { ArrowUp, Star } from 'lucide-react';
+import { ArrowUp, Sparkles } from 'lucide-react';
+import VoiceoverToggle from './VoiceoverToggle';
 
 interface QuerySectionProps {
   onSubmit: (query: string) => void;
   isLoading: boolean;
+  voiceoverEnabled: boolean;
+  onVoiceoverToggle: (enabled: boolean) => void;
 }
 
-const QuerySection: React.FC<QuerySectionProps> = ({ onSubmit, isLoading }) => {
+const QuerySection: React.FC<QuerySectionProps> = ({ 
+  onSubmit, 
+  isLoading, 
+  voiceoverEnabled, 
+  onVoiceoverToggle 
+}) => {
   const [query, setQuery] = useState('');
 
   const handleSubmit = () => {
-    if (query.trim()) {
-      onSubmit(query);
+    if (query.trim() && !isLoading) {
+      onSubmit(query.trim());
     }
   };
 
@@ -26,75 +34,123 @@ const QuerySection: React.FC<QuerySectionProps> = ({ onSubmit, isLoading }) => {
     }
   };
 
-  const exampleQueries = [
-    "How might we solve world hunger?",
-    "How can we make flying cars safe?",
-    "How to teach cats to use smartphones?",
-    "How might we colonize Mars?"
+  const suggestions = [
+    "Explain how photosynthesis works",
+    "How do computers process information?",
+    "What causes the northern lights?",
+    "How does the human immune system work?",
+    "Explain quantum entanglement simply"
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-          Visual AI Explainer
+    <div className="w-full max-w-4xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-6">
+        <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600/20 rounded-full border border-blue-500/30">
+          <Sparkles className="w-5 h-5 text-blue-400" />
+          <span className="text-blue-300 font-medium">AI Visual Explainer</span>
+        </div>
+        
+        <h1 className="text-5xl font-bold text-white leading-tight">
+          Turn complex topics into
+          <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            visual stories
+          </span>
         </h1>
-        <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-          Transform any impossible problem into an engaging visual explanation with AI-generated animations and storytelling
+        
+        <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          Get AI-generated visual explanations with illustrations and {voiceoverEnabled ? 'voiceover' : 'detailed text'} 
+          that make any concept easy to understand
         </p>
       </div>
 
-      <Card className="relative bg-gray-900/50 border-gray-700 backdrop-blur-sm">
-        <div className="p-6 space-y-4">
-          <Textarea
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Describe an impossible problem you'd like me to solve visually..."
-            className="min-h-32 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            disabled={isLoading}
-          />
-          
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-500">
-              Press Enter to submit, Shift+Enter for new line
+      {/* Voiceover Toggle */}
+      <div className="flex justify-center">
+        <VoiceoverToggle 
+          isEnabled={voiceoverEnabled} 
+          onToggle={onVoiceoverToggle} 
+        />
+      </div>
+
+      {/* Query Input */}
+      <Card className="bg-gray-900/50 backdrop-blur-sm border-gray-700 shadow-2xl">
+        <div className="p-8 space-y-6">
+          <div className="space-y-4">
+            <label className="text-lg font-medium text-white block">
+              What would you like explained?
+            </label>
+            <div className="relative">
+              <Textarea
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask me to explain anything... 'How does gravity work?' or 'Explain machine learning'"
+                className="min-h-[120px] bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 text-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+              <Button
+                onClick={handleSubmit}
+                disabled={!query.trim() || isLoading}
+                className="absolute bottom-4 right-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 rounded-full w-12 h-12 p-0"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <ArrowUp className="w-5 h-5" />
+                )}
+              </Button>
             </div>
-            <Button 
-              onClick={handleSubmit}
-              disabled={!query.trim() || isLoading}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0"
-            >
-              {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Generating...</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <ArrowUp className="w-4 h-4" />
-                  <span>Explain Visually</span>
-                </div>
-              )}
-            </Button>
+          </div>
+
+          {/* Suggestions */}
+          <div className="space-y-3">
+            <p className="text-sm text-gray-400">Try these examples:</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => setQuery(suggestion)}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-full border border-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </Card>
 
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-gray-300 flex items-center space-x-2">
-          <Star className="w-5 h-5 text-yellow-500" />
-          <span>Try these examples:</span>
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {exampleQueries.map((example, index) => (
-            <Card 
-              key={index}
-              className="p-4 bg-gray-800/30 border-gray-700 hover:bg-gray-700/30 cursor-pointer transition-all duration-200 hover:border-gray-600"
-              onClick={() => setQuery(example)}
-            >
-              <p className="text-gray-300 text-sm">{example}</p>
-            </Card>
-          ))}
+      {/* Features */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8">
+        <div className="text-center space-y-3">
+          <div className="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto">
+            <Sparkles className="w-6 h-6 text-blue-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-white">AI-Generated Visuals</h3>
+          <p className="text-gray-400 text-sm">
+            Custom illustrations created for your specific topic
+          </p>
+        </div>
+        
+        <div className="text-center space-y-3">
+          <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto">
+            <div className="w-6 h-6 text-purple-400">🎭</div>
+          </div>
+          <h3 className="text-lg font-semibold text-white">Story-Driven</h3>
+          <p className="text-gray-400 text-sm">
+            Complex concepts explained through engaging narratives
+          </p>
+        </div>
+        
+        <div className="text-center space-y-3">
+          <div className="w-12 h-12 bg-green-600/20 rounded-full flex items-center justify-center mx-auto">
+            <div className="w-6 h-6 text-green-400">🔊</div>
+          </div>
+          <h3 className="text-lg font-semibold text-white">Optional Voiceover</h3>
+          <p className="text-gray-400 text-sm">
+            {voiceoverEnabled ? 'Audio narration enabled' : 'Text-only mode active'}
+          </p>
         </div>
       </div>
     </div>

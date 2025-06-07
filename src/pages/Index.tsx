@@ -132,6 +132,8 @@ const Index = () => {
             <QuerySection 
               onSubmit={handleQuerySubmit} 
               isLoading={isLoading}
+              voiceoverEnabled={voiceoverEnabled}
+              onVoiceoverToggle={setVoiceoverEnabled}
             />
           </div>
         ) : (
