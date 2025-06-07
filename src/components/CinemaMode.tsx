@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUp, X, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import { ArrowUp, X, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 
 interface Slide {
   id: string;
@@ -191,6 +191,16 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           )}
         </div>
         <div className="flex items-center space-x-4">
+          {voiceoverEnabled && !isLoading && slides.length > 0 && (
+            <Button
+              onClick={toggleMute}
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/10"
+            >
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </Button>
+          )}
           <Button
             onClick={onClose}
             variant="ghost"
@@ -203,7 +213,33 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
       </div>
 
       {/* Main Cinema Screen */}
-      <div className="flex-1 flex items-center justify-center p-8 pb-32">
+      <div className="flex-1 flex items-center justify-center p-8 pb-32 relative">
+        {/* Left Navigation Button */}
+        {!isLoading && slides.length > 0 && (
+          <Button
+            onClick={prevSlide}
+            disabled={currentSlide === 0}
+            variant="ghost"
+            size="lg"
+            className="absolute left-8 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200 z-20 h-16 w-16"
+          >
+            <SkipBack className="w-8 h-8" />
+          </Button>
+        )}
+
+        {/* Right Navigation Button */}
+        {!isLoading && slides.length > 0 && (
+          <Button
+            onClick={nextSlide}
+            disabled={currentSlide >= slides.length - 1}
+            variant="ghost"
+            size="lg"
+            className="absolute right-8 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200 z-20 h-16 w-16"
+          >
+            <SkipForward className="w-8 h-8" />
+          </Button>
+        )}
+
         <div className="w-full max-w-6xl">
           {isLoading ? (
             <div className="aspect-[4/3] flex items-center justify-center">
@@ -218,7 +254,10 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
               </div>
             </div>
           ) : slides.length > 0 ? (
-            <div className="aspect-[4/3] relative overflow-hidden">
+            <div 
+              className="aspect-[4/3] relative overflow-hidden cursor-pointer"
+              onClick={togglePlay}
+            >
               {/* Content Container with 3D movement and slide transitions */}
               <div className={`h-full flex flex-col transition-all duration-500 ease-out transform-gpu ${
                 isTransitioning 
@@ -241,7 +280,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                   </div>
                 </div>
                 
-                {/* Visual Section - Middle (no background platform) */}
+                {/* Visual Section - Middle */}
                 <div className="flex-1 flex items-center justify-center px-8 z-10">
                   {slides[currentSlide]?.imageUrl ? (
                     <div className={`relative transition-all duration-500 delay-200 ease-out transform-gpu ${
@@ -253,6 +292,14 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                         className="relative max-w-full max-h-full object-contain rounded-xl shadow-2xl"
                         style={{ maxHeight: '60vh' }}
                       />
+                      {/* Play/Pause overlay indicator */}
+                      <div className={`absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl transition-opacity duration-200 ${
+                        isPlaying ? 'opacity-0' : 'opacity-100'
+                      }`}>
+                        <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center">
+                          <div className="w-0 h-0 border-l-[12px] border-l-black border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1"></div>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <div className="w-full h-64 flex items-center justify-center">
@@ -288,51 +335,6 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           )}
         </div>
       </div>
-
-      {/* Fixed Navigation Controls - Positioned to avoid overlap */}
-      {!isLoading && slides.length > 0 && (
-        <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 bg-black/70 backdrop-blur-sm rounded-full px-6 py-3 z-30">
-          <Button
-            onClick={prevSlide}
-            disabled={currentSlide === 0}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200"
-          >
-            <SkipBack className="w-5 h-5" />
-          </Button>
-          
-          <Button
-            onClick={togglePlay}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/20 transition-all duration-200"
-          >
-            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-          </Button>
-          
-          {voiceoverEnabled && (
-            <Button
-              onClick={toggleMute}
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20 transition-all duration-200"
-            >
-              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            </Button>
-          )}
-          
-          <Button
-            onClick={nextSlide}
-            disabled={currentSlide >= slides.length - 1}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200"
-          >
-            <SkipForward className="w-5 h-5" />
-          </Button>
-        </div>
-      )}
 
       {/* Follow-up Section */}
       {!isLoading && slides.length > 0 && (
