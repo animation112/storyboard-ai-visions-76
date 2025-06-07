@@ -1,6 +1,5 @@
 
 import { useState, useCallback } from 'react';
-import { apiService } from '../services/apiService';
 
 export const useTTS = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -8,30 +7,32 @@ export const useTTS = () => {
 
   const speak = useCallback(async (text: string) => {
     try {
-      // Stop current audio if playing
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
+      // For now, we'll use the Web Speech API as a fallback
+      if ('speechSynthesis' in window) {
+        // Stop current speech if playing
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+        }
+
+        setIsPlaying(true);
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => {
+          setIsPlaying(false);
+          setCurrentAudio(null);
+        };
+        
+        utterance.onerror = () => {
+          setIsPlaying(false);
+          setCurrentAudio(null);
+          console.error('Speech synthesis failed');
+        };
+
+        speechSynthesis.speak(utterance);
+      } else {
+        console.warn('Speech synthesis not supported in this browser');
       }
-
-      setIsPlaying(true);
-      const audioUrl = await apiService.textToSpeech(text);
-      const audio = new Audio(audioUrl);
-      
-      setCurrentAudio(audio);
-      
-      audio.onended = () => {
-        setIsPlaying(false);
-        setCurrentAudio(null);
-      };
-      
-      audio.onerror = () => {
-        setIsPlaying(false);
-        setCurrentAudio(null);
-        console.error('Audio playback failed');
-      };
-
-      await audio.play();
     } catch (error) {
       setIsPlaying(false);
       console.error('TTS Error:', error);
@@ -39,6 +40,9 @@ export const useTTS = () => {
   }, [currentAudio]);
 
   const stop = useCallback(() => {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+    }
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
