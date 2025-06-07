@@ -1,4 +1,5 @@
 import { GoogleGenAI, Modality } from "@google/genai";
+import { ttsService } from './ttsService';
 
 export interface GenerateRequest {
   prompt: string;
@@ -12,6 +13,8 @@ export interface Slide {
   content: string;
   imageUrl?: string;
   commentary: string;
+  voiceoverScript: string;
+  audioUrl?: string;
 }
 
 export interface GenerateResponse {
@@ -41,9 +44,15 @@ class ApiService {
 7. Always generate images, never just describe them
 8. Make it cinematic and story-driven
 
+For each slide, provide:
+- A short catchy title
+- Brief visual content (1-2 sentences)
+- A detailed voiceover script (2-3 sentences that explain the concept in depth, as the image is just supporting the explanation)
+
 Format each slide as:
 Slide [number]: [Short catchy title]
-[1-2 very short sentences explaining one concept]
+Visual: [1-2 very short sentences for the slide]
+Voiceover: [2-3 detailed sentences explaining the concept in depth]
 
 Then generate the corresponding illustration.`;
 
@@ -68,14 +77,30 @@ Then generate the corresponding illustration.`;
           const lines = currentText.trim().split('\n').filter(line => line.trim());
           const titleLine = lines.find(line => line.includes('Slide')) || `Slide ${slideCounter + 1}`;
           const title = titleLine.replace(/^Slide \d+:\s*/, '').replace(/^#+\s*/, '');
-          const content = lines.filter(line => !line.includes('Slide')).join(' ').trim() || currentText;
+          
+          // Extract visual content and voiceover script
+          const visualLine = lines.find(line => line.toLowerCase().includes('visual:'));
+          const voiceoverLine = lines.find(line => line.toLowerCase().includes('voiceover:'));
+          
+          const visualContent = visualLine ? visualLine.replace(/^visual:\s*/i, '') : '';
+          const voiceoverScript = voiceoverLine ? voiceoverLine.replace(/^voiceover:\s*/i, '') : '';
+          
+          // Fallback to using all content if structured format not found
+          const content = visualContent || lines.filter(line => 
+            !line.includes('Slide') && 
+            !line.toLowerCase().includes('visual:') && 
+            !line.toLowerCase().includes('voiceover:')
+          ).join(' ').trim() || currentText;
+          
+          const finalVoiceoverScript = voiceoverScript || content;
           
           slides.push({
             id: `slide-${slideCounter}`,
             title: title || `Step ${slideCounter + 1}`,
             content: content,
             imageUrl: imageUrl,
-            commentary: content
+            commentary: content,
+            voiceoverScript: finalVoiceoverScript
           });
 
           slideCounter++;
@@ -92,9 +117,22 @@ Then generate the corresponding illustration.`;
           id: `slide-${slideCounter}`,
           title: title.replace(/^#+\s*/, ''),
           content: content,
-          commentary: content
+          commentary: content,
+          voiceoverScript: content
         });
       }
+
+      // Generate audio for all slides
+      console.log('Generating audio for all slides...');
+      const voiceoverTexts = slides.map(slide => slide.voiceoverScript);
+      const audioUrls = await ttsService.generateMultipleSpeechFiles(voiceoverTexts);
+      
+      // Add audio URLs to slides
+      slides.forEach((slide, index) => {
+        slide.audioUrl = audioUrls[index];
+      });
+
+      console.log('All audio generated successfully');
 
       return {
         slides,

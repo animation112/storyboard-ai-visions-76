@@ -13,6 +13,8 @@ interface Slide {
   content: string;
   imageUrl?: string;
   commentary: string;
+  voiceoverScript: string;
+  audioUrl?: string;
 }
 
 const Index = () => {
@@ -42,10 +44,10 @@ const Index = () => {
   const handleQuerySubmit = async (query: string) => {
     setIsLoading(true);
     setIsCharacterActive(true);
-    setCharacterMessage("Let me think about this...");
+    setCharacterMessage("Let me create your visual story with voiceover...");
     
     try {
-      toast.info("Generating visual explanation...");
+      toast.info("Generating visual explanation with voiceover...");
       
       const response = await apiService.generateExplanation({
         prompt: query
@@ -54,8 +56,8 @@ const Index = () => {
       if (response.success && response.slides.length > 0) {
         setSlides(response.slides);
         setShowCinema(true);
-        setCharacterMessage("Here's your visual explanation!");
-        toast.success("Visual explanation generated!");
+        setCharacterMessage("Your visual story with voiceover is ready!");
+        toast.success("Visual explanation with voiceover generated!");
       } else {
         toast.error(response.error || "Failed to generate explanation");
         setCharacterMessage("Oops! Something went wrong.");
@@ -72,7 +74,7 @@ const Index = () => {
 
   const handleFollowUp = async (question: string) => {
     setIsLoading(true);
-    setCharacterMessage("Let me elaborate on that...");
+    setCharacterMessage("Let me create more content with voiceover...");
     
     try {
       const response = await apiService.generateExplanation({
@@ -81,7 +83,7 @@ const Index = () => {
 
       if (response.success && response.slides.length > 0) {
         setSlides(prev => [...prev, ...response.slides]);
-        toast.success("Follow-up explanation added!");
+        toast.success("Follow-up explanation with voiceover added!");
       } else {
         toast.error("Failed to generate follow-up explanation");
       }

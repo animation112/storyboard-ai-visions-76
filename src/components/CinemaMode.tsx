@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUp, X, Play, Pause, SkipBack, SkipForward } from 'lucide-react';
+import { ArrowUp, X, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 
 interface Slide {
   id: string;
@@ -11,6 +11,8 @@ interface Slide {
   content: string;
   imageUrl?: string;
   commentary: string;
+  voiceoverScript: string;
+  audioUrl?: string;
 }
 
 interface CinemaModeProps {
@@ -24,12 +26,75 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   const [currentSlide, setCurrentSlide] = useState(0);
   const [followUpQuestion, setFollowUpQuestion] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (slides.length > 0 && !isLoading) {
       setIsPlaying(true);
+      playCurrentSlideAudio();
     }
   }, [slides, isLoading]);
+
+  useEffect(() => {
+    if (isPlaying && !isLoading) {
+      playCurrentSlideAudio();
+    } else {
+      stopAudio();
+    }
+  }, [currentSlide, isPlaying]);
+
+  const playCurrentSlideAudio = () => {
+    if (isMuted || !slides[currentSlide]?.audioUrl) return;
+
+    stopAudio();
+    
+    const audio = new Audio(slides[currentSlide].audioUrl);
+    audioRef.current = audio;
+    
+    audio.onloadeddata = () => {
+      console.log('Audio loaded for slide:', currentSlide);
+    };
+    
+    audio.onplay = () => {
+      setIsAudioPlaying(true);
+      console.log('Audio started playing for slide:', currentSlide);
+    };
+    
+    audio.onended = () => {
+      setIsAudioPlaying(false);
+      console.log('Audio ended for slide:', currentSlide);
+      
+      // Auto-advance to next slide when audio finishes
+      if (isPlaying && currentSlide < slides.length - 1) {
+        setTimeout(() => {
+          setCurrentSlide(prev => prev + 1);
+        }, 500); // Small delay before advancing
+      } else if (currentSlide >= slides.length - 1) {
+        setIsPlaying(false);
+      }
+    };
+    
+    audio.onerror = (e) => {
+      console.error('Audio error:', e);
+      setIsAudioPlaying(false);
+    };
+    
+    audio.play().catch(error => {
+      console.error('Error playing audio:', error);
+      setIsAudioPlaying(false);
+    });
+  };
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    setIsAudioPlaying(false);
+  };
 
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
@@ -45,8 +110,22 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     }
   };
 
+  const togglePlay = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    if (!isMuted) {
+      stopAudio();
+    } else if (isPlaying) {
+      playCurrentSlideAudio();
+    }
+  };
+
   const handleFollowUp = () => {
     if (followUpQuestion.trim()) {
+      stopAudio();
       onFollowUp(followUpQuestion);
       setFollowUpQuestion('');
     }
@@ -59,6 +138,13 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     }
   };
 
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      stopAudio();
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       {/* Header Controls */}
@@ -66,8 +152,9 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-bold text-white">Visual AI Explainer</h1>
           {!isLoading && slides.length > 0 && (
-            <div className="text-gray-300">
-              {currentSlide + 1} of {slides.length}
+            <div className="text-gray-300 flex items-center space-x-2">
+              <span>{currentSlide + 1} of {slides.length}</span>
+              {isAudioPlaying && <Volume2 className="w-4 h-4 text-green-400" />}
             </div>
           )}
         </div>
@@ -88,8 +175,8 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
             <div className="aspect-video bg-gray-900 rounded-2xl flex items-center justify-center">
               <div className="text-center space-y-6">
                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-white text-2xl font-medium">Creating your visual story...</p>
-                <p className="text-gray-400">This may take a moment</p>
+                <p className="text-white text-2xl font-medium">Creating your visual story with voiceover...</p>
+                <p className="text-gray-400">Generating images and audio - this may take a moment</p>
               </div>
             </div>
           ) : slides.length > 0 ? (
@@ -121,6 +208,14 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                       <p className="text-xl text-gray-300 leading-relaxed">
                         {slides[currentSlide]?.content}
                       </p>
+                      {slides[currentSlide]?.voiceoverScript && (
+                        <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
+                          <p className="text-sm text-gray-400 mb-2">Voiceover Script:</p>
+                          <p className="text-sm text-gray-300 italic">
+                            {slides[currentSlide].voiceoverScript}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -138,12 +233,21 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                   </Button>
                   
                   <Button
-                    onClick={() => setIsPlaying(!isPlaying)}
+                    onClick={togglePlay}
                     variant="ghost"
                     size="sm"
                     className="text-white hover:bg-white/20"
                   >
                     {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                  </Button>
+                  
+                  <Button
+                    onClick={toggleMute}
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20"
+                  >
+                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                   </Button>
                   
                   <Button
