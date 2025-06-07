@@ -29,13 +29,14 @@ const getStylePrompts = (artStyle?: string) => {
   switch (artStyle) {
     case 'dark-surreal':
       return {
-        narrative: "Use powerful and thought-provoking visual metaphors to tell a story about the topic. The tone should be serious, critical, or reflective.",
-        visuals: `4. Generate an image in a 'Dark Surreal Conceptual Illustration' style for each slide. The style must be:
-   - Metaphorical and Symbolic: Use strong visual metaphors to critique or explore the concept. A phone might be a boot, a light source revealing a skull, etc.
-   - Surrealism: Blend realistic elements with impossible, dreamlike, or nightmarish scenarios to create a striking effect.
-   - Dramatic Lighting: Use high contrast, deep shadows, and dramatic lighting. Light should be a key narrative element, often emanating from a symbolic source like a screen.
-   - Evocative Color Palette: Use a restricted and moody color palette, such as monochromatic purples, stark red/black/white, or somber tones with a single slash of color to establish a powerful atmosphere.
-   - Composition: Use bold, graphic compositions with strong silhouettes for immediate impact.`
+        narrative: "Use powerful conceptual metaphors and social commentary to tell a story about the topic. The tone should be thought-provoking, critical, and reflective of societal issues.",
+        visuals: `4. Generate an image in a 'Conceptual Social Commentary Illustration' style for each slide. The style must be:
+   - Conceptual and Symbolic: Use abstract visual metaphors to critique or explore societal aspects of the concept. Show systems, power structures, or human relationships through symbolic imagery.
+   - Social Commentary Focus: Address how the topic impacts society, inequality, power dynamics, or human behavior through visual storytelling.
+   - Minimalist Conceptual Art: Use clean, geometric shapes and symbolic representations rather than realistic depictions.
+   - Strategic Color Usage: Employ a limited color palette with purposeful color choices - perhaps stark black/white with strategic use of red, blue, or gold to highlight key concepts.
+   - Graphic Design Approach: Think infographic meets editorial illustration - clear, impactful visual communication that makes complex social concepts accessible.
+   - Human-Centered Perspective: Show how the concept affects people, communities, or society at large through abstract human figures or symbolic representations.`
       };
     case 'cute-minimal-watercolor':
     default:
