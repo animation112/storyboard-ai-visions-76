@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowUp, X, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import VoiceoverToggle from './VoiceoverToggle';
 
 interface Slide {
   id: string;
@@ -28,25 +29,28 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [voiceoverEnabled, setVoiceoverEnabled] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (slides.length > 0 && !isLoading) {
+    if (slides.length > 0 && !isLoading && voiceoverEnabled) {
       setIsPlaying(true);
       playCurrentSlideAudio();
+    } else if (slides.length > 0 && !isLoading && !voiceoverEnabled) {
+      setIsPlaying(true);
     }
-  }, [slides, isLoading]);
+  }, [slides, isLoading, voiceoverEnabled]);
 
   useEffect(() => {
-    if (isPlaying && !isLoading) {
+    if (isPlaying && !isLoading && voiceoverEnabled) {
       playCurrentSlideAudio();
     } else {
       stopAudio();
     }
-  }, [currentSlide, isPlaying]);
+  }, [currentSlide, isPlaying, voiceoverEnabled]);
 
   const playCurrentSlideAudio = () => {
-    if (isMuted || !slides[currentSlide]?.audioUrl) return;
+    if (isMuted || !slides[currentSlide]?.audioUrl || !voiceoverEnabled) return;
 
     stopAudio();
     
@@ -118,6 +122,15 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     setIsMuted(!isMuted);
     if (!isMuted) {
       stopAudio();
+    } else if (isPlaying && voiceoverEnabled) {
+      playCurrentSlideAudio();
+    }
+  };
+
+  const handleVoiceoverToggle = (enabled: boolean) => {
+    setVoiceoverEnabled(enabled);
+    if (!enabled) {
+      stopAudio();
     } else if (isPlaying) {
       playCurrentSlideAudio();
     }
@@ -154,18 +167,24 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           {!isLoading && slides.length > 0 && (
             <div className="text-gray-300 flex items-center space-x-2">
               <span>{currentSlide + 1} of {slides.length}</span>
-              {isAudioPlaying && <Volume2 className="w-4 h-4 text-green-400" />}
+              {voiceoverEnabled && isAudioPlaying && <Volume2 className="w-4 h-4 text-green-400" />}
             </div>
           )}
         </div>
-        <Button
-          onClick={onClose}
-          variant="ghost"
-          size="sm"
-          className="text-white hover:bg-white/10"
-        >
-          <X className="w-5 h-5" />
-        </Button>
+        <div className="flex items-center space-x-4">
+          <VoiceoverToggle 
+            isEnabled={voiceoverEnabled} 
+            onToggle={handleVoiceoverToggle} 
+          />
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/10"
+          >
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Main Cinema Screen */}
@@ -175,8 +194,12 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
             <div className="aspect-video bg-gray-900 rounded-2xl flex items-center justify-center">
               <div className="text-center space-y-6">
                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-white text-2xl font-medium">Creating your visual story with voiceover...</p>
-                <p className="text-gray-400">Generating images and audio - this may take a moment</p>
+                <p className="text-white text-2xl font-medium">
+                  Creating your visual story{voiceoverEnabled ? ' with voiceover' : ''}...
+                </p>
+                <p className="text-gray-400">
+                  Generating images{voiceoverEnabled ? ' and audio' : ''} - this may take a moment
+                </p>
               </div>
             </div>
           ) : slides.length > 0 ? (
@@ -208,7 +231,15 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                       <p className="text-xl text-gray-300 leading-relaxed">
                         {slides[currentSlide]?.content}
                       </p>
-                      {slides[currentSlide]?.voiceoverScript && (
+                      {!voiceoverEnabled && slides[currentSlide]?.voiceoverScript && (
+                        <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
+                          <p className="text-sm text-gray-400 mb-2">Detailed Explanation:</p>
+                          <p className="text-sm text-gray-300">
+                            {slides[currentSlide].voiceoverScript}
+                          </p>
+                        </div>
+                      )}
+                      {voiceoverEnabled && slides[currentSlide]?.voiceoverScript && (
                         <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
                           <p className="text-sm text-gray-400 mb-2">Voiceover Script:</p>
                           <p className="text-sm text-gray-300 italic">
@@ -241,14 +272,16 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                     {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                   </Button>
                   
-                  <Button
-                    onClick={toggleMute}
-                    variant="ghost"
-                    size="sm"
-                    className="text-white hover:bg-white/20"
-                  >
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </Button>
+                  {voiceoverEnabled && (
+                    <Button
+                      onClick={toggleMute}
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:bg-white/20"
+                    >
+                      {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    </Button>
+                  )}
                   
                   <Button
                     onClick={nextSlide}

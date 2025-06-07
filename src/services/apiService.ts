@@ -5,6 +5,7 @@ export interface GenerateRequest {
   prompt: string;
   artStyle?: string;
   explanationStyle?: string;
+  voiceoverEnabled?: boolean;
 }
 
 export interface Slide {
@@ -116,17 +117,19 @@ IMPORTANT: Generate 10 images total - one for each slide.`;
         throw new Error(`Failed to generate enough slides. Only generated ${slides.length} slides, expected at least 10.`);
       }
 
-      // Generate audio for all slides
-      console.log('Generating audio for all slides...');
-      const voiceoverTexts = slides.map(slide => slide.voiceoverScript);
-      const audioUrls = await ttsService.generateMultipleSpeechFiles(voiceoverTexts);
-      
-      // Add audio URLs to slides
-      slides.forEach((slide, index) => {
-        slide.audioUrl = audioUrls[index];
-      });
+      // Generate audio for all slides only if voiceover is enabled
+      if (request.voiceoverEnabled !== false) {
+        console.log('Generating audio for all slides...');
+        const voiceoverTexts = slides.map(slide => slide.voiceoverScript);
+        const audioUrls = await ttsService.generateMultipleSpeechFiles(voiceoverTexts);
+        
+        // Add audio URLs to slides
+        slides.forEach((slide, index) => {
+          slide.audioUrl = audioUrls[index];
+        });
+      }
 
-      console.log(`Successfully generated ${slides.length} slides with audio`);
+      console.log(`Successfully generated ${slides.length} slides${request.voiceoverEnabled !== false ? ' with audio' : ''}`);
 
       return {
         slides,

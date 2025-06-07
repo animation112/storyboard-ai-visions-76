@@ -24,6 +24,7 @@ const Index = () => {
   const [characterPosition, setCharacterPosition] = useState({ x: 100, y: 100 });
   const [characterMessage, setCharacterMessage] = useState<string>('');
   const [isCharacterActive, setIsCharacterActive] = useState(false);
+  const [voiceoverEnabled, setVoiceoverEnabled] = useState(true);
   
   const { speak, stop, isPlaying } = useTTS();
 
@@ -44,20 +45,21 @@ const Index = () => {
   const handleQuerySubmit = async (query: string) => {
     setIsLoading(true);
     setIsCharacterActive(true);
-    setCharacterMessage("Let me create your visual story with voiceover...");
+    setCharacterMessage(voiceoverEnabled ? "Let me create your visual story with voiceover..." : "Let me create your visual story...");
     
     try {
-      toast.info("Generating visual explanation with voiceover...");
+      toast.info(voiceoverEnabled ? "Generating visual explanation with voiceover..." : "Generating visual explanation...");
       
       const response = await apiService.generateExplanation({
-        prompt: query
+        prompt: query,
+        voiceoverEnabled: voiceoverEnabled
       });
 
       if (response.success && response.slides.length > 0) {
         setSlides(response.slides);
         setShowCinema(true);
-        setCharacterMessage("Your visual story with voiceover is ready!");
-        toast.success("Visual explanation with voiceover generated!");
+        setCharacterMessage(voiceoverEnabled ? "Your visual story with voiceover is ready!" : "Your visual story is ready!");
+        toast.success(voiceoverEnabled ? "Visual explanation with voiceover generated!" : "Visual explanation generated!");
       } else {
         toast.error(response.error || "Failed to generate explanation");
         setCharacterMessage("Oops! Something went wrong.");
@@ -74,16 +76,17 @@ const Index = () => {
 
   const handleFollowUp = async (question: string) => {
     setIsLoading(true);
-    setCharacterMessage("Let me create more content with voiceover...");
+    setCharacterMessage(voiceoverEnabled ? "Let me create more content with voiceover..." : "Let me create more content...");
     
     try {
       const response = await apiService.generateExplanation({
-        prompt: question
+        prompt: question,
+        voiceoverEnabled: voiceoverEnabled
       });
 
       if (response.success && response.slides.length > 0) {
         setSlides(prev => [...prev, ...response.slides]);
-        toast.success("Follow-up explanation with voiceover added!");
+        toast.success(voiceoverEnabled ? "Follow-up explanation with voiceover added!" : "Follow-up explanation added!");
       } else {
         toast.error("Failed to generate follow-up explanation");
       }
