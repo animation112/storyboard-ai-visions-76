@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUp, Sparkles } from 'lucide-react';
-import VoiceoverToggle from './VoiceoverToggle';
+import { ArrowUp, Sparkles, Volume2, VolumeX } from 'lucide-react';
 
 interface QuerySectionProps {
   onSubmit: (query: string) => void;
@@ -59,17 +58,47 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         </h1>
         
         <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-          Get AI-generated visual explanations with illustrations and {voiceoverEnabled ? 'voiceover' : 'detailed text'} 
+          Get AI-generated visual explanations with illustrations and detailed explanations 
           that make any concept easy to understand
         </p>
       </div>
 
-      {/* Voiceover Toggle */}
+      {/* Voiceover Toggle - More Prominent */}
       <div className="flex justify-center">
-        <VoiceoverToggle 
-          isEnabled={voiceoverEnabled} 
-          onToggle={onVoiceoverToggle} 
-        />
+        <Card className="bg-gray-900/50 backdrop-blur-sm border-gray-700">
+          <div className="p-6">
+            <div className="flex items-center justify-between space-x-6">
+              <div className="flex items-center space-x-3">
+                {voiceoverEnabled ? (
+                  <Volume2 className="w-6 h-6 text-green-400" />
+                ) : (
+                  <VolumeX className="w-6 h-6 text-gray-400" />
+                )}
+                <div>
+                  <h3 className="text-white font-medium">
+                    {voiceoverEnabled ? 'Voiceover Enabled' : 'Voiceover Disabled'}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {voiceoverEnabled 
+                      ? 'Audio narration will be generated for each slide' 
+                      : 'Only detailed text explanations will be shown'
+                    }
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => onVoiceoverToggle(!voiceoverEnabled)}
+                variant={voiceoverEnabled ? "default" : "outline"}
+                className={voiceoverEnabled 
+                  ? "bg-green-600 hover:bg-green-700 text-white" 
+                  : "border-gray-600 text-gray-300 hover:bg-gray-800"
+                }
+              >
+                {voiceoverEnabled ? 'Disable Voiceover' : 'Enable Voiceover'}
+              </Button>
+            </div>
+          </div>
+        </Card>
       </div>
 
       {/* Query Input */}
@@ -145,11 +174,17 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         
         <div className="text-center space-y-3">
           <div className="w-12 h-12 bg-green-600/20 rounded-full flex items-center justify-center mx-auto">
-            <div className="w-6 h-6 text-green-400">🔊</div>
+            {voiceoverEnabled ? (
+              <Volume2 className="w-6 h-6 text-green-400" />
+            ) : (
+              <VolumeX className="w-6 h-6 text-gray-400" />
+            )}
           </div>
-          <h3 className="text-lg font-semibold text-white">Optional Voiceover</h3>
+          <h3 className="text-lg font-semibold text-white">
+            {voiceoverEnabled ? 'Audio Narration' : 'Detailed Text'}
+          </h3>
           <p className="text-gray-400 text-sm">
-            {voiceoverEnabled ? 'Audio narration enabled' : 'Text-only mode active'}
+            {voiceoverEnabled ? 'AI-generated voice narration' : 'Comprehensive text explanations'}
           </p>
         </div>
       </div>

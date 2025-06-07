@@ -4,7 +4,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowUp, X, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
-import VoiceoverToggle from './VoiceoverToggle';
 
 interface Slide {
   id: string;
@@ -31,6 +30,14 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [voiceoverEnabled, setVoiceoverEnabled] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Detect if slides have audio to determine initial voiceover state
+  useEffect(() => {
+    if (slides.length > 0) {
+      const hasAudio = slides.some(slide => slide.audioUrl);
+      setVoiceoverEnabled(hasAudio);
+    }
+  }, [slides]);
 
   useEffect(() => {
     if (slides.length > 0 && !isLoading && voiceoverEnabled) {
@@ -127,15 +134,6 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     }
   };
 
-  const handleVoiceoverToggle = (enabled: boolean) => {
-    setVoiceoverEnabled(enabled);
-    if (!enabled) {
-      stopAudio();
-    } else if (isPlaying) {
-      playCurrentSlideAudio();
-    }
-  };
-
   const handleFollowUp = () => {
     if (followUpQuestion.trim()) {
       stopAudio();
@@ -172,10 +170,6 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           )}
         </div>
         <div className="flex items-center space-x-4">
-          <VoiceoverToggle 
-            isEnabled={voiceoverEnabled} 
-            onToggle={handleVoiceoverToggle} 
-          />
           <Button
             onClick={onClose}
             variant="ghost"
@@ -228,22 +222,20 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                       <h2 className="text-4xl font-bold text-white leading-tight">
                         {slides[currentSlide]?.title}
                       </h2>
-                      <p className="text-xl text-gray-300 leading-relaxed">
-                        {slides[currentSlide]?.content}
-                      </p>
-                      {!voiceoverEnabled && slides[currentSlide]?.voiceoverScript && (
-                        <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
-                          <p className="text-sm text-gray-400 mb-2">Detailed Explanation:</p>
-                          <p className="text-sm text-gray-300">
-                            {slides[currentSlide].voiceoverScript}
+                      
+                      {/* Show detailed explanation text only when voiceover is disabled OR as the main content */}
+                      {voiceoverEnabled ? (
+                        // When voiceover is enabled, show the voiceover script as text content
+                        <div className="space-y-4">
+                          <p className="text-xl text-gray-300 leading-relaxed">
+                            {slides[currentSlide]?.voiceoverScript}
                           </p>
                         </div>
-                      )}
-                      {voiceoverEnabled && slides[currentSlide]?.voiceoverScript && (
-                        <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
-                          <p className="text-sm text-gray-400 mb-2">Voiceover Script:</p>
-                          <p className="text-sm text-gray-300 italic">
-                            {slides[currentSlide].voiceoverScript}
+                      ) : (
+                        // When voiceover is disabled, show detailed explanation
+                        <div className="space-y-4">
+                          <p className="text-xl text-gray-300 leading-relaxed">
+                            {slides[currentSlide]?.voiceoverScript}
                           </p>
                         </div>
                       )}
