@@ -12,40 +12,6 @@ export class TTSService {
     });
   }
 
-  private addEmotionalExpressions(text: string): string {
-    // Add emotional expressions to make the voiceover more engaging
-    const sentences = text.split('. ');
-    const emotionalSentences = sentences.map((sentence, index) => {
-      if (!sentence.trim()) return sentence;
-      
-      // Add emotions based on content and position
-      if (sentence.toLowerCase().includes('imagine') || sentence.toLowerCase().includes('picture')) {
-        return `[curious] ${sentence}`;
-      } else if (sentence.toLowerCase().includes('wow') || sentence.toLowerCase().includes('amazing')) {
-        return `[excited] ${sentence}`;
-      } else if (sentence.toLowerCase().includes('problem') || sentence.toLowerCase().includes('issue')) {
-        return `[cautiously] ${sentence}`;
-      } else if (sentence.toLowerCase().includes('fun') || sentence.toLowerCase().includes('play')) {
-        return `[playful] ${sentence}`;
-      } else if (sentence.toLowerCase().includes('important') || sentence.toLowerCase().includes('critical')) {
-        return `[serious] ${sentence}`;
-      } else if (index === 0) {
-        // First sentence - often introduction
-        return `[calm] ${sentence}`;
-      } else if (index === sentences.length - 1 && sentences.length > 1) {
-        // Last sentence - often conclusion
-        return `[elated] ${sentence}`;
-      } else {
-        // Vary emotions for middle sentences
-        const emotions = ['curious', 'playful', 'excited', 'calm'];
-        const emotion = emotions[index % emotions.length];
-        return `[${emotion}] ${sentence}`;
-      }
-    });
-    
-    return emotionalSentences.join('. ');
-  }
-
   async generateSpeech(text: string): Promise<string> {
     try {
       // If we know the API key is invalid, return empty string immediately
@@ -54,12 +20,10 @@ export class TTSService {
         return '';
       }
 
-      // Add emotional expressions to the text
-      const emotionalText = this.addEmotionalExpressions(text);
-      console.log('Generating speech for text with emotions:', emotionalText);
+      console.log('Generating speech for text:', text);
       
       const audioStream = await this.client.textToSpeech.stream(this.voiceId, {
-        text: emotionalText,
+        text: text,
         modelId: 'eleven_multilingual_v2', // Using v2 instead of v3 as it's more widely available
         outputFormat: 'mp3_44100_128'
       });
@@ -73,7 +37,7 @@ export class TTSService {
       const audioBlob = new Blob(chunks, { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       
-      console.log('Speech generated successfully with emotions');
+      console.log('Speech generated successfully');
       return audioUrl;
     } catch (error: any) {
       console.error('Error generating speech:', error);
