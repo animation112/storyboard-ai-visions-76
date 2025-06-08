@@ -8,8 +8,42 @@ export class TTSService {
 
   constructor() {
     this.client = new ElevenLabsClient({
-      apiKey: 'sk_33d9adedf102d7f082b10137d93fdec01b878f04e21a4d83'
+      apiKey: 'sk_54165c6b09047491b7b3c65331e67a8c902985e594510297'
     });
+  }
+
+  private addEmotionalExpressions(text: string): string {
+    // Add emotional expressions to make the voiceover more engaging
+    const sentences = text.split('. ');
+    const emotionalSentences = sentences.map((sentence, index) => {
+      if (!sentence.trim()) return sentence;
+      
+      // Add emotions based on content and position
+      if (sentence.toLowerCase().includes('imagine') || sentence.toLowerCase().includes('picture')) {
+        return `[curious] ${sentence}`;
+      } else if (sentence.toLowerCase().includes('wow') || sentence.toLowerCase().includes('amazing')) {
+        return `[excited] ${sentence}`;
+      } else if (sentence.toLowerCase().includes('problem') || sentence.toLowerCase().includes('issue')) {
+        return `[cautiously] ${sentence}`;
+      } else if (sentence.toLowerCase().includes('fun') || sentence.toLowerCase().includes('play')) {
+        return `[playful] ${sentence}`;
+      } else if (sentence.toLowerCase().includes('important') || sentence.toLowerCase().includes('critical')) {
+        return `[serious] ${sentence}`;
+      } else if (index === 0) {
+        // First sentence - often introduction
+        return `[calm] ${sentence}`;
+      } else if (index === sentences.length - 1 && sentences.length > 1) {
+        // Last sentence - often conclusion
+        return `[elated] ${sentence}`;
+      } else {
+        // Vary emotions for middle sentences
+        const emotions = ['curious', 'playful', 'excited', 'calm'];
+        const emotion = emotions[index % emotions.length];
+        return `[${emotion}] ${sentence}`;
+      }
+    });
+    
+    return emotionalSentences.join('. ');
   }
 
   async generateSpeech(text: string): Promise<string> {
@@ -20,11 +54,13 @@ export class TTSService {
         return '';
       }
 
-      console.log('Generating speech for text:', text);
+      // Add emotional expressions to the text
+      const emotionalText = this.addEmotionalExpressions(text);
+      console.log('Generating speech for text with emotions:', emotionalText);
       
       const audioStream = await this.client.textToSpeech.stream(this.voiceId, {
-        text: text,
-        modelId: 'eleven_multilingual_v2',
+        text: emotionalText,
+        modelId: 'eleven_v3',
         outputFormat: 'mp3_44100_128'
       });
 
@@ -37,7 +73,7 @@ export class TTSService {
       const audioBlob = new Blob(chunks, { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       
-      console.log('Speech generated successfully');
+      console.log('Speech generated successfully with emotions');
       return audioUrl;
     } catch (error: any) {
       console.error('Error generating speech:', error);
