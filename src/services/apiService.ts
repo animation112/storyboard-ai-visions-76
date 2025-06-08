@@ -100,6 +100,7 @@ Continue this exact pattern for all 10 slides.
 
 Then generate 10 corresponding illustrations - one image immediately after each slide description.`;
 
+      console.log('Sending request to Gemini...');
       const response = await this.ai.models.generateContent({
         model: "gemini-2.0-flash-preview-image-generation",
         contents: `${request.prompt}\n\n${systemPrompt}`,
@@ -125,7 +126,40 @@ Then generate 10 corresponding illustrations - one image immediately after each 
       console.log(`Received ${images.length} images from Gemini`);
       console.log('Full text content length:', fullTextContent.length);
 
-      // Check if no images were generated
+      // If we get significantly fewer images than expected, retry once
+      if (images.length < 5) {
+        console.warn(`Only received ${images.length} images, retrying generation...`);
+        
+        try {
+          const retryResponse = await this.ai.models.generateContent({
+            model: "gemini-2.0-flash-preview-image-generation",
+            contents: `${request.prompt}\n\nPLEASE GENERATE EXACTLY 10 IMAGES - one for each slide. This is critical.\n\n${systemPrompt}`,
+            config: {
+              responseModalities: [Modality.TEXT, Modality.IMAGE],
+            },
+          });
+
+          // Clear previous data and process retry response
+          fullTextContent = '';
+          images.length = 0;
+
+          for (const part of retryResponse.candidates[0].content.parts) {
+            if (part.text) {
+              fullTextContent += part.text;
+            } else if (part.inlineData) {
+              const imageUrl = `data:image/png;base64,${part.inlineData.data}`;
+              images.push(imageUrl);
+            }
+          }
+
+          console.log(`Retry: Received ${images.length} images from Gemini`);
+        } catch (retryError) {
+          console.error('Retry failed:', retryError);
+          // Continue with original response
+        }
+      }
+
+      // Check if no images were generated after retry
       if (images.length === 0) {
         return {
           slides: [],
@@ -158,9 +192,12 @@ Then generate 10 corresponding illustrations - one image immediately after each 
         console.log(`Parsed slide ${slideIndex}: ${slide.title}`);
       }
 
-      // If regex parsing didn't get 10 slides, try alternative parsing
-      if (slides.length < 10) {
+      // If regex parsing didn't get enough slides, try alternative parsing
+      if (slides.length < 5) {
         console.log(`Only got ${slides.length} slides from regex, trying alternative parsing`);
+        
+        // Clear slides and try alternative parsing
+        slides.length = 0;
         
         // Split by "Slide" and process each section
         const slideSections = fullTextContent.split(/Slide\s+\d+:/i).filter(section => section.trim());
@@ -227,27 +264,16 @@ Then generate 10 corresponding illustrations - one image immediately after each 
         throw new Error('Failed to parse any slides from the response');
       }
 
-      if (slides.length < 5) {
-        throw new Error(`Failed to generate enough slides. Only generated ${slides.length} slides, expected 10. Retrying...`);
+      if (slides.length < 3) {
+        throw new Error(`Failed to generate enough slides. Only generated ${slides.length} slides, expected 10. Please try a different prompt.`);
       }
 
-      // Check if slides with images are too few
-      const slidesWithImages = slides.filter(slide => slide.imageUrl);
-      if (slidesWithImages.length < 3) {
-        return {
-          slides: [],
-          refinedPrompt: '',
-          success: false,
-          error: 'Too few images were generated for the explanation. Please try again with a different prompt or art style.'
-        };
-      }
-
-      // Pad to 10 slides if we have between 5-9 slides
-      while (slides.length < 10 && slides.length >= 5) {
+      // Pad to 10 slides if we have between 3-9 slides
+      while (slides.length < 10 && slides.length >= 3) {
         const lastSlide = slides[slides.length - 1];
         const paddedSlide: Slide = {
           id: `slide-${slides.length}`,
-          title: `Summary ${slides.length - 4}`,
+          title: `Summary ${slides.length - 2}`,
           content: `Let's review what we've learned so far.`,
           imageUrl: images[slides.length] || lastSlide.imageUrl,
           commentary: `Let's review what we've learned so far.`,
@@ -256,19 +282,26 @@ Then generate 10 corresponding illustrations - one image immediately after each 
         slides.push(paddedSlide);
       }
 
-      // Generate audio for all slides only if voiceover is enabled
-      if (request.voiceoverEnabled !== false) {
+      // Generate audio for all slides only if voiceover is enabled AND TTS is available
+      if (request.voiceoverEnabled !== false && ttsService.isAvailable()) {
         console.log('Generating audio for all slides...');
-        const voiceoverTexts = slides.map(slide => slide.voiceoverScript);
-        const audioUrls = await ttsService.generateMultipleSpeechFiles(voiceoverTexts);
-        
-        // Add audio URLs to slides
-        slides.forEach((slide, index) => {
-          slide.audioUrl = audioUrls[index];
-        });
+        try {
+          const voiceoverTexts = slides.map(slide => slide.voiceoverScript);
+          const audioUrls = await ttsService.generateMultipleSpeechFiles(voiceoverTexts);
+          
+          // Add audio URLs to slides
+          slides.forEach((slide, index) => {
+            slide.audioUrl = audioUrls[index];
+          });
+        } catch (audioError) {
+          console.error('Audio generation failed, but continuing without audio:', audioError);
+          // Don't fail the entire generation if only audio fails
+        }
+      } else if (!ttsService.isAvailable()) {
+        console.log('TTS service not available, skipping audio generation');
       }
 
-      console.log(`Successfully generated ${slides.length} slides${request.voiceoverEnabled !== false ? ' with audio' : ''}`);
+      console.log(`Successfully generated ${slides.length} slides${request.voiceoverEnabled !== false && ttsService.isAvailable() ? ' with audio' : ''}`);
 
       return {
         slides,

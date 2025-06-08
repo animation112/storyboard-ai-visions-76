@@ -4,6 +4,7 @@ import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 export class TTSService {
   private client: ElevenLabsClient;
   private readonly voiceId = 'JBFqnCBsd6RMkjVDRZzb'; // George voice
+  private isApiKeyValid = true;
 
   constructor() {
     this.client = new ElevenLabsClient({
@@ -13,6 +14,12 @@ export class TTSService {
 
   async generateSpeech(text: string): Promise<string> {
     try {
+      // If we know the API key is invalid, return empty string immediately
+      if (!this.isApiKeyValid) {
+        console.log('TTS API key is invalid, skipping audio generation');
+        return '';
+      }
+
       console.log('Generating speech for text:', text);
       
       const audioStream = await this.client.textToSpeech.stream(this.voiceId, {
@@ -32,9 +39,17 @@ export class TTSService {
       
       console.log('Speech generated successfully');
       return audioUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating speech:', error);
-      throw error;
+      
+      // Check if it's a 401 error (invalid API key)
+      if (error.statusCode === 401) {
+        console.error('ElevenLabs API key is invalid or expired. Disabling TTS for this session.');
+        this.isApiKeyValid = false;
+      }
+      
+      // Return empty string instead of throwing - this allows the app to continue without audio
+      return '';
     }
   }
 
@@ -52,6 +67,11 @@ export class TTSService {
     }
     
     return audioUrls;
+  }
+
+  // Method to check if TTS is available
+  isAvailable(): boolean {
+    return this.isApiKeyValid;
   }
 }
 
