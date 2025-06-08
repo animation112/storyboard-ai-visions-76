@@ -60,7 +60,7 @@ export class TTSService {
       
       const audioStream = await this.client.textToSpeech.stream(this.voiceId, {
         text: emotionalText,
-        modelId: 'eleven_v3',
+        modelId: 'eleven_multilingual_v2', // Using v2 instead of v3 as it's more widely available
         outputFormat: 'mp3_44100_128'
       });
 
@@ -78,9 +78,9 @@ export class TTSService {
     } catch (error: any) {
       console.error('Error generating speech:', error);
       
-      // Check if it's a 401 error (invalid API key)
-      if (error.statusCode === 401) {
-        console.error('ElevenLabs API key is invalid or expired. Disabling TTS for this session.');
+      // Check if it's a 403 error (model access denied) or 401 (invalid API key)
+      if (error.statusCode === 403 || error.statusCode === 401) {
+        console.error('ElevenLabs API key is invalid or model access denied. Disabling TTS for this session.');
         this.isApiKeyValid = false;
       }
       
@@ -97,6 +97,16 @@ export class TTSService {
       if (text.trim()) {
         const audioUrl = await this.generateSpeech(text);
         audioUrls.push(audioUrl);
+        
+        // If API key becomes invalid, stop trying to generate more audio
+        if (!this.isApiKeyValid) {
+          console.log('API key invalid, stopping audio generation for remaining slides');
+          // Fill remaining slots with empty strings
+          while (audioUrls.length < texts.length) {
+            audioUrls.push('');
+          }
+          break;
+        }
       } else {
         audioUrls.push('');
       }
