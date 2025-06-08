@@ -101,49 +101,29 @@ Continue this exact pattern for all 10 slides.
 Then generate 10 corresponding illustrations - one image immediately after each slide description.`;
 
       console.log('Sending request to Gemini...');
-      const response = await this.ai.models.generateContent({
-        model: "gemini-2.0-flash-preview-image-generation",
-        contents: `${request.prompt}\n\n${systemPrompt}`,
-        config: {
-          responseModalities: [Modality.TEXT, Modality.IMAGE],
-        },
-      });
-
-      const slides: Slide[] = [];
+      let response;
+      let images: string[] = [];
       let fullTextContent = '';
-      const images: string[] = [];
+      let retryCount = 0;
+      const maxRetries = 3;
 
-      // First, collect all text and images separately
-      for (const part of response.candidates[0].content.parts) {
-        if (part.text) {
-          fullTextContent += part.text;
-        } else if (part.inlineData) {
-          const imageUrl = `data:image/png;base64,${part.inlineData.data}`;
-          images.push(imageUrl);
-        }
-      }
-
-      console.log(`Received ${images.length} images from Gemini`);
-      console.log('Full text content length:', fullTextContent.length);
-
-      // If we get significantly fewer images than expected, retry once
-      if (images.length < 5) {
-        console.warn(`Only received ${images.length} images, retrying generation...`);
-        
+      // Retry loop for image generation
+      while (retryCount < maxRetries) {
         try {
-          const retryResponse = await this.ai.models.generateContent({
+          response = await this.ai.models.generateContent({
             model: "gemini-2.0-flash-preview-image-generation",
-            contents: `${request.prompt}\n\nPLEASE GENERATE EXACTLY 10 IMAGES - one for each slide. This is critical.\n\n${systemPrompt}`,
+            contents: `${request.prompt}\n\n${systemPrompt}`,
             config: {
               responseModalities: [Modality.TEXT, Modality.IMAGE],
             },
           });
 
-          // Clear previous data and process retry response
+          // Reset for each attempt
+          images = [];
           fullTextContent = '';
-          images.length = 0;
 
-          for (const part of retryResponse.candidates[0].content.parts) {
+          // Collect all text and images
+          for (const part of response.candidates[0].content.parts) {
             if (part.text) {
               fullTextContent += part.text;
             } else if (part.inlineData) {
@@ -152,20 +132,33 @@ Then generate 10 corresponding illustrations - one image immediately after each 
             }
           }
 
-          console.log(`Retry: Received ${images.length} images from Gemini`);
-        } catch (retryError) {
-          console.error('Retry failed:', retryError);
-          // Continue with original response
+          console.log(`Attempt ${retryCount + 1}: Received ${images.length} images from Gemini`);
+
+          // If we have a reasonable number of images, break out of retry loop
+          if (images.length >= 5) {
+            break;
+          }
+
+          retryCount++;
+          if (retryCount < maxRetries) {
+            console.warn(`Only received ${images.length} images, retrying... (${retryCount}/${maxRetries})`);
+          }
+        } catch (genError) {
+          console.error(`Generation attempt ${retryCount + 1} failed:`, genError);
+          retryCount++;
+          if (retryCount >= maxRetries) {
+            throw genError;
+          }
         }
       }
 
-      // Check if no images were generated after retry
+      // Check if we still have too few images after all retries
       if (images.length === 0) {
         return {
           slides: [],
           refinedPrompt: '',
           success: false,
-          error: 'No images were generated for the explanation. Please try again with a different prompt or art style.'
+          error: 'No images were generated after multiple attempts. Please try again with a different prompt or art style.'
         };
       }
 
@@ -173,6 +166,7 @@ Then generate 10 corresponding illustrations - one image immediately after each 
       const slideRegex = /Slide\s+(\d+):\s*([^\n]+)\s*\n\s*Visual:\s*([^\n]+)\s*\n\s*Voiceover:\s*([^\n]+(?:\n(?!Slide)[^\n]*)*)/gi;
       let match;
       let slideIndex = 0;
+      const slides: Slide[] = [];
 
       while ((match = slideRegex.exec(fullTextContent)) !== null && slideIndex < 10) {
         const [, slideNumber, title, visual, voiceover] = match;
@@ -283,6 +277,7 @@ Then generate 10 corresponding illustrations - one image immediately after each 
       }
 
       // Generate audio for all slides only if voiceover is enabled AND TTS is available
+      // This should NOT fail the entire generation if it doesn't work
       if (request.voiceoverEnabled !== false && ttsService.isAvailable()) {
         console.log('Generating audio for all slides...');
         try {
@@ -293,15 +288,20 @@ Then generate 10 corresponding illustrations - one image immediately after each 
           slides.forEach((slide, index) => {
             slide.audioUrl = audioUrls[index];
           });
+          
+          console.log('Audio generation completed successfully');
         } catch (audioError) {
           console.error('Audio generation failed, but continuing without audio:', audioError);
           // Don't fail the entire generation if only audio fails
+          // The slides will just not have audio
         }
       } else if (!ttsService.isAvailable()) {
         console.log('TTS service not available, skipping audio generation');
+      } else {
+        console.log('Voiceover disabled, skipping audio generation');
       }
 
-      console.log(`Successfully generated ${slides.length} slides${request.voiceoverEnabled !== false && ttsService.isAvailable() ? ' with audio' : ''}`);
+      console.log(`Successfully generated ${slides.length} slides${request.voiceoverEnabled !== false && ttsService.isAvailable() ? ' (with audio attempt)' : ''}`);
 
       return {
         slides,
