@@ -125,6 +125,16 @@ Then generate 10 corresponding illustrations - one image immediately after each 
       console.log(`Received ${images.length} images from Gemini`);
       console.log('Full text content length:', fullTextContent.length);
 
+      // Check if no images were generated
+      if (images.length === 0) {
+        return {
+          slides: [],
+          refinedPrompt: '',
+          success: false,
+          error: 'No images were generated for the explanation. Please try again with a different prompt or art style.'
+        };
+      }
+
       // Parse slides using improved regex
       const slideRegex = /Slide\s+(\d+):\s*([^\n]+)\s*\n\s*Visual:\s*([^\n]+)\s*\n\s*Voiceover:\s*([^\n]+(?:\n(?!Slide)[^\n]*)*)/gi;
       let match;
@@ -219,6 +229,17 @@ Then generate 10 corresponding illustrations - one image immediately after each 
 
       if (slides.length < 5) {
         throw new Error(`Failed to generate enough slides. Only generated ${slides.length} slides, expected 10. Retrying...`);
+      }
+
+      // Check if slides with images are too few
+      const slidesWithImages = slides.filter(slide => slide.imageUrl);
+      if (slidesWithImages.length < 3) {
+        return {
+          slides: [],
+          refinedPrompt: '',
+          success: false,
+          error: 'Too few images were generated for the explanation. Please try again with a different prompt or art style.'
+        };
       }
 
       // Pad to 10 slides if we have between 5-9 slides
