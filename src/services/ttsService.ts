@@ -7,7 +7,7 @@ export class TTSService {
 
   constructor() {
     this.client = new ElevenLabsClient({
-      apiKey: 'sk_95d4a96ed70b048e541eb280dd57c6e1f4aa1677d0f962d6'
+      apiKey: 'sk_33d9adedf102d7f082b10137d93fdec01b878f04e21a4d83'
     });
   }
 
