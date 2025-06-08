@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +32,29 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   const [showContent, setShowContent] = useState(false);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const transitionSfxRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize transition sound effect
+  useEffect(() => {
+    transitionSfxRef.current = new Audio('https://raw.githubusercontent.com/Panshief12/storyboard-ai-visions/main/447808__florianreichelt__swishes-and-swooshes.mp3');
+    transitionSfxRef.current.volume = 0.3; // Lower volume for sfx
+    
+    return () => {
+      if (transitionSfxRef.current) {
+        transitionSfxRef.current = null;
+      }
+    };
+  }, []);
+
+  // Play transition sound effect
+  const playTransitionSfx = () => {
+    if (transitionSfxRef.current && !isMuted) {
+      transitionSfxRef.current.currentTime = 0;
+      transitionSfxRef.current.play().catch(error => {
+        console.log('Transition SFX play error:', error);
+      });
+    }
+  };
 
   // Detect if slides have audio to determine initial voiceover state
   useEffect(() => {
@@ -103,6 +125,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 
   // Helper function to advance slide with animation
   const advanceSlideWithAnimation = (nextSlideIndex: number) => {
+    playTransitionSfx(); // Play sound effect
     setSlideDirection('right');
     setIsTransitioning(true);
     setTimeout(() => {
@@ -167,6 +190,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   // Move to the next slide
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
+      playTransitionSfx(); // Play sound effect
       advanceSlideWithAnimation(currentSlide + 1);
     } else {
       setIsPlaying(false);
@@ -176,6 +200,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   // Move to the previous slide
   const prevSlide = () => {
     if (currentSlide > 0) {
+      playTransitionSfx(); // Play sound effect
       setSlideDirection('left');
       setIsTransitioning(true);
       setTimeout(() => {
