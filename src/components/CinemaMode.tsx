@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -100,6 +101,16 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     return highlightedText;
   };
 
+  // Helper function to advance slide with animation
+  const advanceSlideWithAnimation = (nextSlideIndex: number) => {
+    setSlideDirection('right');
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentSlide(nextSlideIndex);
+      setIsTransitioning(false);
+    }, 250);
+  };
+
   // Play audio for the current slide
   const playCurrentSlideAudio = () => {
     if (isMuted || !slides[currentSlide]?.audioUrl || !voiceoverEnabled) return;
@@ -122,10 +133,10 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
       setIsAudioPlaying(false);
       console.log('Audio ended for slide:', currentSlide);
       
-      // Auto-advance to next slide when audio finishes
+      // Auto-advance to next slide with animation when audio finishes
       if (isPlaying && currentSlide < slides.length - 1) {
         setTimeout(() => {
-          setCurrentSlide(prev => prev + 1);
+          advanceSlideWithAnimation(currentSlide + 1);
         }, 500); // Small delay before advancing
       } else if (currentSlide >= slides.length - 1) {
         setIsPlaying(false);
@@ -156,12 +167,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   // Move to the next slide
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
-      setSlideDirection('right');
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentSlide(currentSlide + 1);
-        setIsTransitioning(false);
-      }, 250);
+      advanceSlideWithAnimation(currentSlide + 1);
     } else {
       setIsPlaying(false);
     }
