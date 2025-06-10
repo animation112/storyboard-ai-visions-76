@@ -158,7 +158,7 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="flex flex-col items-center p-4 max-w-4xl mx-auto relative">
-        <div className="flex flex-col items-center text-center space-y-6 w-full pt-8">
+        <div className="flex flex-col items-center text-center space-y-4 w-full pt-6">
           {/* Gradient Orb */}
           <div className="relative">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 orb-glow animate-pulse" />
@@ -169,13 +169,10 @@ const Index = () => {
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold">Good evening</h1>
             <h2 className="text-xl text-muted-foreground">How can I visualize your ideas?</h2>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Choose a prompt below or write your own to start creating visual explanations
-            </p>
           </div>
 
           {/* Input Area - Moved up */}
-          <div className="w-full max-w-3xl space-y-4 pt-4">
+          <div className="w-full max-w-3xl space-y-4 pt-2">
             <div className="relative">
               <Textarea
                 placeholder="How can Visual AI help you today?"
@@ -226,7 +223,7 @@ const Index = () => {
           </div>
 
           {/* Suggestion Cards - Moved below input */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl pt-2">
             {suggestions.map((suggestion, index) => (
               <Card
                 key={index}
@@ -245,7 +242,7 @@ const Index = () => {
           </Button>
 
           {/* Footer */}
-          <p className="text-xs text-muted-foreground text-center pt-4">
+          <p className="text-xs text-muted-foreground text-center pt-2">
             Visual AI can make mistakes. Please double-check responses.
           </p>
         </div>
