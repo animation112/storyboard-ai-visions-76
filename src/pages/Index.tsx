@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Brain, RefreshCw, ChevronDown, Paperclip, Send } from "lucide-react";
 import CinemaMode from '../components/CinemaMode';
@@ -157,29 +157,80 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4 max-w-4xl mx-auto relative">
-        <div className="flex flex-col items-center text-center space-y-8 w-full">
+      <main className="flex flex-col items-center p-4 max-w-4xl mx-auto relative">
+        <div className="flex flex-col items-center text-center space-y-6 w-full pt-8">
           {/* Gradient Orb */}
           <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 orb-glow animate-pulse" />
-            <div className="absolute inset-0 w-24 h-24 rounded-full bg-gradient-to-t from-transparent to-white/20" />
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 orb-glow animate-pulse" />
+            <div className="absolute inset-0 w-20 h-20 rounded-full bg-gradient-to-t from-transparent to-white/20" />
           </div>
 
           {/* Greeting */}
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold">Good evening</h1>
-            <h2 className="text-2xl text-muted-foreground">How can I visualize your ideas?</h2>
+            <h1 className="text-2xl font-semibold">Good evening</h1>
+            <h2 className="text-xl text-muted-foreground">How can I visualize your ideas?</h2>
             <p className="text-sm text-muted-foreground max-w-md">
               Choose a prompt below or write your own to start creating visual explanations
             </p>
           </div>
 
-          {/* Suggestion Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
+          {/* Input Area - Moved up */}
+          <div className="w-full max-w-3xl space-y-4 pt-4">
+            <div className="relative">
+              <Textarea
+                placeholder="How can Visual AI help you today?"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                className="min-h-[100px] resize-none pr-20 pb-12 bg-card/50 border-border/20"
+                disabled={isLoading}
+              />
+              <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                <Button size="icon" variant="ghost" className="h-8 w-8">
+                  <Paperclip className="w-4 h-4" />
+                </Button>
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  className="h-8 w-8"
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !message.trim()}
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Model Selector */}
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span>Visual AI with {voiceoverEnabled ? 'Voiceover' : 'Silent Mode'}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setVoiceoverEnabled(!voiceoverEnabled)}
+                  className="h-auto p-1 text-xs"
+                >
+                  {voiceoverEnabled ? 'Disable Audio' : 'Enable Audio'}
+                </Button>
+              </div>
+              <div className="text-xs">
+                Use <kbd className="px-1 py-0.5 bg-muted rounded text-xs">shift + return</kbd> for new line
+              </div>
+            </div>
+          </div>
+
+          {/* Suggestion Cards - Moved below input */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl pt-4">
             {suggestions.map((suggestion, index) => (
               <Card
                 key={index}
-                className="p-4 cursor-pointer hover:bg-accent/50 transition-colors border border-border/20 bg-card/50"
+                className="p-3 cursor-pointer hover:bg-accent/50 transition-colors border border-border/20 bg-card/50"
                 onClick={() => handleSuggestionClick(suggestion)}
               >
                 <p className="text-sm text-left">{suggestion}</p>
@@ -192,60 +243,9 @@ const Index = () => {
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh prompts
           </Button>
-        </div>
-
-        {/* Input Area */}
-        <div className="w-full max-w-3xl mt-12 space-y-4">
-          <div className="relative">
-            <Textarea
-              placeholder="How can Visual AI help you today?"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-              className="min-h-[120px] resize-none pr-20 pb-12 bg-card/50 border-border/20"
-              disabled={isLoading}
-            />
-            <div className="absolute bottom-3 right-3 flex items-center gap-2">
-              <Button size="icon" variant="ghost" className="h-8 w-8">
-                <Paperclip className="w-4 h-4" />
-              </Button>
-              <Button 
-                size="icon" 
-                variant="ghost" 
-                className="h-8 w-8"
-                onClick={handleSendMessage}
-                disabled={isLoading || !message.trim()}
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Model Selector */}
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <span>Visual AI with {voiceoverEnabled ? 'Voiceover' : 'Silent Mode'}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setVoiceoverEnabled(!voiceoverEnabled)}
-                className="h-auto p-1 text-xs"
-              >
-                {voiceoverEnabled ? 'Disable Audio' : 'Enable Audio'}
-              </Button>
-            </div>
-            <div className="text-xs">
-              Use <kbd className="px-1 py-0.5 bg-muted rounded text-xs">shift + return</kbd> for new line
-            </div>
-          </div>
 
           {/* Footer */}
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center pt-4">
             Visual AI can make mistakes. Please double-check responses.
           </p>
         </div>
