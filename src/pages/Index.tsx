@@ -1,6 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import QuerySection from '../components/QuerySection';
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Brain, RefreshCw, ChevronDown, Paperclip, Send } from "lucide-react";
 import CinemaMode from '../components/CinemaMode';
 import AnimatedCharacter from '../components/AnimatedCharacter';
 import { apiService } from '../services/apiService';
@@ -18,6 +22,7 @@ interface Slide {
 }
 
 const Index = () => {
+  const [message, setMessage] = useState("");
   const [slides, setSlides] = useState<Slide[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showCinema, setShowCinema] = useState(false);
@@ -27,6 +32,13 @@ const Index = () => {
   const [voiceoverEnabled, setVoiceoverEnabled] = useState(true);
   
   const { speak, stop, isPlaying } = useTTS();
+
+  const suggestions = [
+    "Explain quantum computing in simple terms",
+    "How does photosynthesis work?",
+    "Show me the water cycle process",
+    "What causes climate change?",
+  ];
 
   // Animate character movement
   useEffect(() => {
@@ -42,7 +54,7 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [isCharacterActive, showCinema]);
 
-  const handleQuerySubmit = async (query: string, artStyle?: string) => {
+  const handleQuerySubmit = async (query: string) => {
     setIsLoading(true);
     setIsCharacterActive(true);
     setCharacterMessage(voiceoverEnabled ? "Let me create your visual story with voiceover..." : "Let me create your visual story...");
@@ -52,7 +64,6 @@ const Index = () => {
       
       const response = await apiService.generateExplanation({
         prompt: query,
-        artStyle: artStyle,
         voiceoverEnabled: voiceoverEnabled
       });
 
@@ -72,6 +83,17 @@ const Index = () => {
     } finally {
       setIsLoading(false);
       setTimeout(() => setCharacterMessage(''), 3000);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setMessage(suggestion);
+  };
+
+  const handleSendMessage = () => {
+    if (message.trim()) {
+      handleQuerySubmit(message);
+      setMessage("");
     }
   };
 
@@ -107,45 +129,127 @@ const Index = () => {
     stop(); // Stop any playing audio
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      {/* Animated background particles */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent" />
-        {Array.from({ length: 50 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full opacity-20 animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`
-            }}
-          />
-        ))}
-      </div>
+  if (showCinema) {
+    return (
+      <CinemaMode
+        slides={slides}
+        isLoading={isLoading}
+        onClose={handleCloseCinema}
+        onFollowUp={handleFollowUp}
+      />
+    );
+  }
 
-      {/* Main content */}
-      <div className="relative z-10">
-        {!showCinema ? (
-          <div className="container mx-auto px-4 py-12 min-h-screen flex items-center justify-center">
-            <QuerySection 
-              onSubmit={handleQuerySubmit} 
-              isLoading={isLoading}
-              voiceoverEnabled={voiceoverEnabled}
-              onVoiceoverToggle={setVoiceoverEnabled}
-            />
+  return (
+    <div className="min-h-screen gradient-bg text-foreground">
+      {/* Header */}
+      <header className="flex items-center justify-between p-4 border-b border-border/10">
+        <div className="flex items-center gap-2">
+          <Brain className="w-5 h-5" />
+          <span className="font-semibold">Visual AI</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-medium">
+            U
           </div>
-        ) : (
-          <CinemaMode
-            slides={slides}
-            isLoading={isLoading}
-            onClose={handleCloseCinema}
-            onFollowUp={handleFollowUp}
-          />
-        )}
-      </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4 max-w-4xl mx-auto relative">
+        <div className="flex flex-col items-center text-center space-y-8 w-full">
+          {/* Gradient Orb */}
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 orb-glow animate-pulse" />
+            <div className="absolute inset-0 w-24 h-24 rounded-full bg-gradient-to-t from-transparent to-white/20" />
+          </div>
+
+          {/* Greeting */}
+          <div className="space-y-2">
+            <h1 className="text-3xl font-semibold">Good evening</h1>
+            <h2 className="text-2xl text-muted-foreground">How can I visualize your ideas?</h2>
+            <p className="text-sm text-muted-foreground max-w-md">
+              Choose a prompt below or write your own to start creating visual explanations
+            </p>
+          </div>
+
+          {/* Suggestion Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
+            {suggestions.map((suggestion, index) => (
+              <Card
+                key={index}
+                className="p-4 cursor-pointer hover:bg-accent/50 transition-colors border border-border/20 bg-card/50"
+                onClick={() => handleSuggestionClick(suggestion)}
+              >
+                <p className="text-sm text-left">{suggestion}</p>
+              </Card>
+            ))}
+          </div>
+
+          {/* Refresh Prompts */}
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh prompts
+          </Button>
+        </div>
+
+        {/* Input Area */}
+        <div className="w-full max-w-3xl mt-12 space-y-4">
+          <div className="relative">
+            <Textarea
+              placeholder="How can Visual AI help you today?"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              className="min-h-[120px] resize-none pr-20 pb-12 bg-card/50 border-border/20"
+              disabled={isLoading}
+            />
+            <div className="absolute bottom-3 right-3 flex items-center gap-2">
+              <Button size="icon" variant="ghost" className="h-8 w-8">
+                <Paperclip className="w-4 h-4" />
+              </Button>
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                className="h-8 w-8"
+                onClick={handleSendMessage}
+                disabled={isLoading || !message.trim()}
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Model Selector */}
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span>Visual AI with {voiceoverEnabled ? 'Voiceover' : 'Silent Mode'}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setVoiceoverEnabled(!voiceoverEnabled)}
+                className="h-auto p-1 text-xs"
+              >
+                {voiceoverEnabled ? 'Disable Audio' : 'Enable Audio'}
+              </Button>
+            </div>
+            <div className="text-xs">
+              Use <kbd className="px-1 py-0.5 bg-muted rounded text-xs">shift + return</kbd> for new line
+            </div>
+          </div>
+
+          {/* Footer */}
+          <p className="text-xs text-muted-foreground text-center">
+            Visual AI can make mistakes. Please double-check responses.
+          </p>
+        </div>
+      </main>
 
       {/* Animated Character */}
       <AnimatedCharacter
