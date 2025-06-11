@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 export default function Navbar() {
   return (
     <nav className="flex justify-center px-4 mt-4">
-      <div className="bg-black text-white px-8 py-3 rounded-full">
+      <div className="bg-black text-white px-16 py-3 rounded-full w-full max-w-5xl">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -17,7 +17,7 @@ export default function Navbar() {
           </div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-6 mx-12">
+          <div className="hidden md:flex items-center space-x-8 mx-16">
             <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm">
               Product
             </a>
