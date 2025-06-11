@@ -94,20 +94,23 @@ body {
   }
 }
 
-/* Professional gradient background */
+/* Blue-purple gradient background inspired by the uploaded image */
 .gradient-bg {
   background: linear-gradient(
-    180deg,
-    rgba(16, 185, 129, 0.08) 0%,
-    rgba(15, 23, 42, 0.4) 25%,
-    rgba(15, 23, 42, 0.8) 50%,
-    rgba(0, 0, 0, 0.95) 75%,
-    rgba(0, 0, 0, 1) 100%
+    135deg,
+    #1e1b4b 0%,
+    #312e81 15%,
+    #3730a3 30%,
+    #4338ca 45%,
+    #4f46e5 60%,
+    #6366f1 75%,
+    #818cf8 90%,
+    #a5b4fc 100%
   );
 }
 
-/* Enhanced orb glow effect */
+/* Enhanced orb glow effect with blue theme */
 .orb-glow {
-  box-shadow: 0 0 40px rgba(16, 185, 129, 0.3), 0 0 80px rgba(16, 185, 129, 0.1), inset 0 0 20px
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.4), 0 0 80px rgba(99, 102, 241, 0.2), inset 0 0 20px
     rgba(255, 255, 255, 0.1);
 }
