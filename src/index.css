@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -48,12 +49,11 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     
-    /* Custom green gradient with more black */
+    /* Custom indigo-purple gradient */
     --green-gradient: linear-gradient(
       180deg,
-      #14532d 0%,     /* green-900 */
-      #15803d 25%,    /* green-700 */
-      #1a1a1a 70%,    /* dark gray */
+      #312e81 0%,     /* indigo-900 */
+      #581c87 50%,    /* purple-900 */
       #000000 100%    /* black */
     );
   }
@@ -102,13 +102,13 @@ body {
   }
 }
 
-/* Green gradient background */
+/* Indigo-purple gradient background */
 .gradient-bg {
   background: var(--green-gradient);
 }
 
-/* Enhanced orb glow effect */
+/* Enhanced orb glow effect with matching gradient */
 .orb-glow {
-  box-shadow: 0 0 40px rgba(16, 185, 129, 0.3), 0 0 80px rgba(16, 185, 129, 0.1), inset 0 0 20px
+  box-shadow: 0 0 40px rgba(49, 46, 129, 0.3), 0 0 80px rgba(88, 28, 135, 0.1), inset 0 0 20px
     rgba(255, 255, 255, 0.1);
 }

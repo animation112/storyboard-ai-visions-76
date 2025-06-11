@@ -28,9 +28,14 @@ const AnimatedCharacter: React.FC<AnimatedCharacterProps> = ({ isActive, positio
         transform: `translate(${position.x}px, ${position.y}px)`
       }}
     >
-      {/* Animated circle character */}
+      {/* Animated circle character with gradient */}
       <div className="relative">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-lg animate-pulse">
+        <div 
+          className="w-16 h-16 rounded-full shadow-lg animate-pulse"
+          style={{
+            background: 'linear-gradient(180deg, #312e81 0%, #581c87 50%, #000000 100%)'
+          }}
+        >
           {/* Eyes */}
           <div className="absolute top-4 left-3 w-2 h-2 bg-white rounded-full" />
           <div className="absolute top-4 right-3 w-2 h-2 bg-white rounded-full" />
@@ -47,8 +52,13 @@ const AnimatedCharacter: React.FC<AnimatedCharacterProps> = ({ isActive, positio
           </div>
         )}
 
-        {/* Floating effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full animate-ping" />
+        {/* Floating effect with gradient colors */}
+        <div 
+          className="absolute inset-0 rounded-full animate-ping"
+          style={{
+            background: 'linear-gradient(180deg, rgba(49, 46, 129, 0.2) 0%, rgba(88, 28, 135, 0.2) 50%, rgba(0, 0, 0, 0.2) 100%)'
+          }}
+        />
       </div>
     </div>
   );
