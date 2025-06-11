@@ -123,21 +123,25 @@ const Index = () => {
   return (
     <div className="min-h-screen gradient-bg text-foreground">
       {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b border-border/10">
-        <div className="flex items-center gap-2">
-          <Brain className="w-5 h-5" />
-          <span className="font-semibold">Visual AI</span>
+      <header className="flex items-center justify-between p-6 border-b border-border/10 backdrop-blur-sm bg-background/20">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <Brain className="w-5 h-5 text-white" />
+          </div>
+          <span className="font-bold text-xl bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            Visual AI
+          </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <ThemeToggle />
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-medium">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-sm font-bold text-white shadow-lg">
             U
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4">
+      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-88px)] p-6">
         <QuerySection
           onSubmit={handleQuerySubmit}
           isLoading={isLoading}
