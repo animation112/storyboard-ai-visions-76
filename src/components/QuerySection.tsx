@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -62,15 +61,9 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-8">
+    <div className="w-full max-w-4xl mx-auto space-y-12">
       {/* Header */}
-      <div className="text-center space-y-6">
-        {/* Gradient Orb */}
-        <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 orb-glow animate-pulse mx-auto" />
-          <div className="absolute inset-0 w-20 h-20 rounded-full bg-gradient-to-t from-transparent to-white/20 mx-auto" />
-        </div>
-
+      <div className="text-center space-y-8">
         <div className="space-y-2">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground text-center max-w-4xl mx-auto leading-tight tracking-tight">
             Discover the <span className="inline-block">📸</span> stories
