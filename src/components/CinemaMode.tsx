@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -252,12 +251,12 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col font-pixelify">
-      {/* Header Controls */}
-      <div className="flex items-center justify-between p-4 md:p-6 bg-gradient-to-b from-black/80 to-transparent relative z-10">
+      {/* Header Controls - Fixed height with proper spacing */}
+      <div className="h-16 md:h-20 flex items-center justify-between px-4 md:px-6 bg-gradient-to-b from-black/90 to-black/60 backdrop-blur-sm relative z-30 shrink-0">
         <div className="flex items-center space-x-2 md:space-x-4">
-          <h1 className="text-lg md:text-2xl font-bold text-white">Visual AI Explainer</h1>
+          <h1 className="text-base md:text-xl font-bold text-white">Visual AI Explainer</h1>
           {!isLoading && slides.length > 0 && (
-            <div className="text-gray-300 flex items-center space-x-2 text-sm md:text-base">
+            <div className="text-gray-300 flex items-center space-x-2 text-xs md:text-sm">
               <span>{currentSlide + 1} of {slides.length}</span>
               {voiceoverEnabled && isAudioPlaying && <Volume2 className="w-3 h-3 md:w-4 md:h-4 text-green-400" />}
             </div>
@@ -285,9 +284,9 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
         </div>
       </div>
 
-      {/* Main Cinema Screen - Fixed responsive layout */}
-      <div className="flex-1 flex items-center justify-center p-4 md:p-8 pb-20 md:pb-32 relative overflow-hidden">
-        {/* Navigation Buttons - Positioned at sides */}
+      {/* Main Cinema Screen - Takes remaining space between header and footer */}
+      <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0 }}>
+        {/* Navigation Buttons */}
         {!isLoading && slides.length > 0 && (
           <>
             <Button
@@ -312,186 +311,131 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           </>
         )}
 
-        <div className="w-full max-w-7xl mx-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center min-h-[50vh]">
-              <div className="text-center space-y-4 md:space-y-6">
-                <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-white text-lg md:text-2xl font-medium">
-                  Creating your visual story{voiceoverEnabled ? ' with voiceover' : ''}...
-                </p>
-                <p className="text-gray-400 text-sm md:text-base">
-                  Generating images{voiceoverEnabled ? ' and audio' : ''} - this may take a moment
-                </p>
-              </div>
-            </div>
-          ) : slides.length > 0 ? (
-            <div className="w-full max-w-6xl mx-auto">
-              {/* Slide Container with enhanced transitions and proper aspect ratio */}
-              <div 
-                className={`w-full flex flex-col transition-all duration-500 ease-out transform-gpu cursor-pointer ${
-                  isTransitioning 
-                    ? slideDirection === 'right' 
-                      ? 'animate-slide-out-left' 
-                      : 'translate-x-full opacity-0'
-                    : 'translate-x-0 opacity-100'
-                } ${showContent ? 'animate-fade-in' : 'opacity-0'} hover:scale-[1.02]`}
-                onClick={togglePlay}
-                style={{
-                  transformStyle: 'preserve-3d',
-                  perspective: '1000px'
-                }}
-              >
-                
-                {/* Title Section - Responsive typography */}
-                <div className="px-4 md:px-8 pt-4 md:pt-8 pb-2 md:pb-4 z-10">
-                  <div className={`transition-all duration-500 ease-out ${
-                    showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-                  }`}>
-                    <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white text-center leading-tight drop-shadow-lg font-pixelify px-2">
-                      {slides[currentSlide]?.title}
-                    </h2>
-                  </div>
-                </div>
-                
-                {/* Visual Section - Proper landscape orientation and white glow */}
-                <div className="flex-1 flex items-center justify-center px-4 md:px-8 py-4 z-10">
-                  {slides[currentSlide]?.imageUrl ? (
-                    <div className={`relative transition-all duration-500 delay-200 ease-out transform-gpu max-w-full ${
-                      showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                    }`}>
-                      {/* White glow background */}
-                      <div className="absolute inset-0 bg-white/20 rounded-xl blur-xl scale-110 -z-10"></div>
-                      <div className="absolute inset-0 bg-white/10 rounded-xl blur-2xl scale-125 -z-20"></div>
-                      
-                      <img 
-                        src={slides[currentSlide].imageUrl} 
-                        alt={slides[currentSlide].title}
-                        className="relative w-full h-auto object-contain rounded-xl shadow-2xl"
-                        style={{ 
-                          maxHeight: '60vh',
-                          minHeight: '300px',
-                          aspectRatio: '16/9' // Force landscape aspect ratio
-                        }}
-                      />
-                      {/* Play/Pause overlay indicator */}
-                      <div className={`absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl transition-opacity duration-200 ${
-                        isPlaying ? 'opacity-0' : 'opacity-100'
-                      }`}>
-                        <div className="w-12 h-12 md:w-16 md:h-16 bg-white/80 rounded-full flex items-center justify-center">
-                          <div className="w-0 h-0 border-l-[8px] md:border-l-[12px] border-l-black border-t-[6px] md:border-t-[8px] border-t-transparent border-b-[6px] md:border-b-[8px] border-b-transparent ml-1"></div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="w-full h-64 flex items-center justify-center">
-                      <p className="text-gray-400">No image available</p>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Text Section with highlighting and better visibility */}
-                <div className="px-4 md:px-8 pb-4 md:pb-8 pt-2 md:pt-4 z-10">
-                  <div className={`transition-all duration-500 delay-400 ease-out ${
-                    showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                  }`}>
-                    {/* Background for better text visibility */}
-                    <div className="bg-black/40 backdrop-blur-sm rounded-lg p-4 md:p-6 mx-auto max-w-4xl">
-                      <p 
-                        className="text-base md:text-lg lg:text-xl text-white leading-relaxed text-center font-pixelify font-medium"
-                        dangerouslySetInnerHTML={{ 
-                          __html: highlightText(slides[currentSlide]?.voiceoverScript || '') 
-                        }}
-                      />
-                    </div>
-                  </div>
+        {/* Content Container - Properly centered and spaced */}
+        <div className="h-full flex items-center justify-center p-4 md:p-8">
+          <div className="w-full max-w-6xl mx-auto h-full flex flex-col justify-center">
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="text-center space-y-4 md:space-y-6">
+                  <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                  <p className="text-white text-lg md:text-2xl font-medium">
+                    Creating your visual story{voiceoverEnabled ? ' with voiceover' : ''}...
+                  </p>
+                  <p className="text-gray-400 text-sm md:text-base">
+                    Generating images{voiceoverEnabled ? ' and audio' : ''} - this may take a moment
+                  </p>
                 </div>
               </div>
-
-              {/* Incoming slide for smooth transition */}
-              {isTransitioning && (
+            ) : slides.length > 0 ? (
+              <div className="w-full h-full flex flex-col">
+                {/* Slide Container */}
                 <div 
-                  className={`absolute inset-0 w-full flex flex-col transition-all duration-500 ease-out transform-gpu ${
-                    slideDirection === 'right' ? 'animate-slide-in-right' : '-translate-x-full opacity-0'
-                  }`}
-                  style={{
-                    transformStyle: 'preserve-3d',
-                    perspective: '1000px'
-                  }}
+                  className={`w-full h-full flex flex-col transition-all duration-500 ease-out transform-gpu cursor-pointer ${
+                    isTransitioning 
+                      ? slideDirection === 'right' 
+                        ? 'animate-slide-out-left' 
+                        : 'translate-x-full opacity-0'
+                      : 'translate-x-0 opacity-100'
+                  } ${showContent ? 'animate-fade-in' : 'opacity-0'} hover:scale-[1.01]`}
+                  onClick={togglePlay}
                 >
-                  {/* Preview of next slide content */}
-                  <div className="px-4 md:px-8 pt-4 md:pt-8 pb-2 md:pb-4 z-10">
-                    <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white text-center leading-tight drop-shadow-lg font-pixelify">
-                      {slides[slideDirection === 'right' ? currentSlide + 1 : currentSlide - 1]?.title}
-                    </h2>
+                  
+                  {/* Title Section */}
+                  <div className="text-center py-4 md:py-6 shrink-0">
+                    <div className={`transition-all duration-500 ease-out ${
+                      showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+                    }`}>
+                      <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-lg font-pixelify px-2">
+                        {slides[currentSlide]?.title}
+                      </h2>
+                    </div>
                   </div>
                   
-                  <div className="flex-1 flex items-center justify-center px-4 md:px-8 py-4 z-10">
-                    {slides[slideDirection === 'right' ? currentSlide + 1 : currentSlide - 1]?.imageUrl && (
-                      <div className="relative max-w-full">
+                  {/* Visual Section - Takes most space */}
+                  <div className="flex-1 flex items-center justify-center px-4 md:px-8 min-h-0">
+                    {slides[currentSlide]?.imageUrl ? (
+                      <div className={`relative transition-all duration-500 delay-200 ease-out transform-gpu w-full max-w-4xl ${
+                        showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                      }`}>
                         {/* White glow background */}
                         <div className="absolute inset-0 bg-white/20 rounded-xl blur-xl scale-110 -z-10"></div>
                         <div className="absolute inset-0 bg-white/10 rounded-xl blur-2xl scale-125 -z-20"></div>
                         
                         <img 
-                          src={slides[slideDirection === 'right' ? currentSlide + 1 : currentSlide - 1].imageUrl} 
-                          alt={slides[slideDirection === 'right' ? currentSlide + 1 : currentSlide - 1].title}
+                          src={slides[currentSlide].imageUrl} 
+                          alt={slides[currentSlide].title}
                           className="relative w-full h-auto object-contain rounded-xl shadow-2xl"
                           style={{ 
-                            maxHeight: '60vh',
-                            minHeight: '300px',
-                            aspectRatio: '16/9' // Force landscape aspect ratio
+                            maxHeight: '50vh',
+                            aspectRatio: '16/9'
                           }}
                         />
+                        {/* Play/Pause overlay indicator */}
+                        <div className={`absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl transition-opacity duration-200 ${
+                          isPlaying ? 'opacity-0' : 'opacity-100'
+                        }`}>
+                          <div className="w-12 h-12 md:w-16 md:h-16 bg-white/80 rounded-full flex items-center justify-center">
+                            <div className="w-0 h-0 border-l-[8px] md:border-l-[12px] border-l-black border-t-[6px] md:border-t-[8px] border-t-transparent border-b-[6px] md:border-b-[8px] border-b-transparent ml-1"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-full h-64 flex items-center justify-center">
+                        <p className="text-gray-400">No image available</p>
                       </div>
                     )}
                   </div>
                   
-                  <div className="px-4 md:px-8 pb-4 md:pb-8 pt-2 md:pt-4 z-10">
-                    <div className="bg-black/40 backdrop-blur-sm rounded-lg p-4 md:p-6 mx-auto max-w-4xl">
-                      <p 
-                        className="text-base md:text-lg lg:text-xl text-white leading-relaxed text-center font-pixelify font-medium"
-                        dangerouslySetInnerHTML={{ 
-                          __html: highlightText(slides[slideDirection === 'right' ? currentSlide + 1 : currentSlide - 1]?.voiceoverScript || '') 
-                        }}
-                      />
+                  {/* Text Section */}
+                  <div className="px-4 md:px-8 py-4 md:py-6 shrink-0">
+                    <div className={`transition-all duration-500 delay-400 ease-out ${
+                      showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}>
+                      <div className="bg-black/40 backdrop-blur-sm rounded-lg p-3 md:p-4 mx-auto max-w-3xl">
+                        <p 
+                          className="text-sm md:text-base lg:text-lg text-white leading-relaxed text-center font-pixelify font-medium"
+                          dangerouslySetInnerHTML={{ 
+                            __html: highlightText(slides[currentSlide]?.voiceoverScript || '') 
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              )}
 
-              {/* Progress Bar */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800 z-20">
-                <div 
-                  className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 ease-out"
-                  style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
-                />
+                {/* Progress Bar */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800 z-20">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 ease-out"
+                    style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
+                  />
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center min-h-[50vh]">
-              <p className="text-white text-lg md:text-xl">No slides generated yet</p>
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center justify-center">
+                <p className="text-white text-lg md:text-xl">No slides generated yet</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Follow-up Section - Responsive */}
+      {/* Follow-up Section - Fixed height at bottom */}
       {!isLoading && slides.length > 0 && (
-        <div className={`p-4 md:p-6 bg-gradient-to-t from-black/80 to-transparent transition-all duration-500 ${
+        <div className={`shrink-0 p-4 md:p-6 bg-gradient-to-t from-black/90 to-black/60 backdrop-blur-sm transition-all duration-500 ${
           showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}>
           <div className="max-w-4xl mx-auto">
             <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700">
-              <div className="p-4 md:p-6 space-y-4">
-                <h3 className="text-base md:text-lg font-semibold text-white font-pixelify">Continue the story</h3>
+              <div className="p-3 md:p-4 space-y-3">
+                <h3 className="text-sm md:text-base font-semibold text-white font-pixelify">Continue the story</h3>
                 <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                   <Textarea
                     value={followUpQuestion}
                     onChange={(e) => setFollowUpQuestion(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask for more details or explore another aspect..."
-                    className="flex-1 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 resize-none focus:ring-2 focus:ring-blue-500 font-pixelify text-sm md:text-base"
+                    className="flex-1 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 resize-none focus:ring-2 focus:ring-blue-500 font-pixelify text-sm"
                     rows={2}
                   />
                   <Button 
