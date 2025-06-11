@@ -120,12 +120,12 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen gradient-bg text-foreground">
-      {/* New Navbar */}
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Navbar */}
       <Navbar />
 
       {/* Main Content */}
-      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)] p-4">
+      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4">
         <QuerySection
           onSubmit={handleQuerySubmit}
           isLoading={isLoading}
@@ -145,3 +145,5 @@ const Index = () => {
 };
 
 export default Index;
+
+</initial_code>
