@@ -72,8 +72,12 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Good evening</h1>
-          <h2 className="text-xl text-muted-foreground">How can I visualize your ideas?</h2>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground text-center max-w-4xl mx-auto leading-tight tracking-tight">
+            Discover the <span className="inline-block">📸</span> stories
+            <br />
+            behind top <span className="text-red-500">★</span> notch{" "}
+            <span className="border-2 border-foreground rounded-full px-4 py-1 inline-block">design</span>.
+          </h1>
         </div>
       </div>
 
