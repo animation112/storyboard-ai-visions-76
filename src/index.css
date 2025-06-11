@@ -94,20 +94,89 @@ body {
   }
 }
 
-/* Professional gradient background */
+/* Enhanced professional gradient background */
 .gradient-bg {
   background: linear-gradient(
     180deg,
-    rgba(16, 185, 129, 0.08) 0%,
-    rgba(15, 23, 42, 0.4) 25%,
-    rgba(15, 23, 42, 0.8) 50%,
-    rgba(0, 0, 0, 0.95) 75%,
+    rgba(5, 150, 105, 0.15) 0%,
+    rgba(15, 23, 42, 0.6) 25%,
+    rgba(15, 23, 42, 0.9) 50%,
+    rgba(0, 0, 0, 0.98) 75%,
     rgba(0, 0, 0, 1) 100%
   );
+  position: relative;
 }
 
-/* Enhanced orb glow effect */
+.gradient-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at top,
+    rgba(16, 185, 129, 0.1) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+/* Enhanced orb glow effect with more vibrant colors */
 .orb-glow {
-  box-shadow: 0 0 40px rgba(16, 185, 129, 0.3), 0 0 80px rgba(16, 185, 129, 0.1), inset 0 0 20px
-    rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 0 60px rgba(16, 185, 129, 0.4), 
+    0 0 120px rgba(16, 185, 129, 0.2), 
+    0 0 180px rgba(16, 185, 129, 0.1),
+    inset 0 0 30px rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.orb-glow::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #10b981, #06d6a0, #0891b2, #7c3aed);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.3;
+  filter: blur(4px);
+}
+
+/* App-like scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #10b981, #059669);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #059669, #047857);
+}
+
+/* Enhanced animations for app-like feel */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(16, 185, 129, 0.4),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }

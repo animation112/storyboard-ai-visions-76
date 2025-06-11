@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ArrowUp, Sparkles, Volume2, VolumeX, Palette, ChevronDown, RefreshCw } from 'lucide-react';
 
@@ -62,143 +61,156 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-8">
+    <div className="w-full max-w-4xl mx-auto space-y-10">
       {/* Header */}
-      <div className="text-center space-y-6">
-        {/* Gradient Orb */}
+      <div className="text-center space-y-8">
+        {/* Enhanced Gradient Orb */}
         <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 orb-glow animate-pulse mx-auto" />
-          <div className="absolute inset-0 w-20 h-20 rounded-full bg-gradient-to-t from-transparent to-white/20 mx-auto" />
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 orb-glow animate-pulse mx-auto shadow-2xl" />
+          <div className="absolute inset-0 w-24 h-24 rounded-full bg-gradient-to-t from-transparent to-white/30 mx-auto" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <Sparkles className="w-8 h-8 text-white animate-pulse" />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Good evening</h1>
-          <h2 className="text-xl text-muted-foreground">How can I visualize your ideas?</h2>
+        <div className="space-y-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
+            Good evening
+          </h1>
+          <h2 className="text-2xl font-medium text-slate-300">
+            How can I <span className="text-emerald-400 font-semibold">visualize</span> your ideas?
+          </h2>
         </div>
       </div>
 
-      {/* Query Input with Controls */}
-      <div className="w-full max-w-3xl mx-auto space-y-4">
+      {/* Query Input with Enhanced Controls */}
+      <div className="w-full max-w-3xl mx-auto space-y-6">
         <div className="relative">
           <Textarea
             placeholder="How can Visual AI help you today?"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyPress}
-            className="min-h-[100px] resize-none pr-20 pb-16 bg-card/50 border-border/20"
+            className="min-h-[120px] resize-none pr-20 pb-20 bg-card/60 backdrop-blur-sm border-border/30 focus:border-emerald-400/50 focus:ring-emerald-400/25 text-lg placeholder:text-muted-foreground/70"
             disabled={isLoading}
           />
           
-          {/* Controls Row */}
-          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {/* Style Dropdown */}
+          {/* Enhanced Controls Row */}
+          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {/* Enhanced Style Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 text-xs">
-                    <Palette className="w-3 h-3 mr-1" />
-                    {artStyles.find(s => s.value === artStyle)?.label}
-                    <ChevronDown className="w-3 h-3 ml-1" />
+                  <Button variant="ghost" size="sm" className="h-9 text-sm bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 hover:bg-slate-700/50 text-slate-200">
+                    <Palette className="w-4 h-4 mr-2 text-purple-400" />
+                    <span className="text-purple-300">{artStyles.find(s => s.value === artStyle)?.label}</span>
+                    <ChevronDown className="w-4 h-4 ml-2 text-slate-400" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48 bg-popover border-border">
+                <DropdownMenuContent className="w-52 bg-slate-900/95 backdrop-blur-sm border-slate-700/50">
                   {artStyles.map((style) => (
                     <DropdownMenuItem 
                       key={style.value}
                       onClick={() => setArtStyle(style.value)}
-                      className="flex flex-col items-start p-3"
+                      className="flex flex-col items-start p-4 hover:bg-slate-800/50 text-slate-200"
                     >
-                      <div className="font-medium">{style.label}</div>
-                      <div className="text-xs text-muted-foreground">{style.description}</div>
+                      <div className="font-medium text-purple-300">{style.label}</div>
+                      <div className="text-xs text-slate-400">{style.description}</div>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Voiceover Toggle */}
+              {/* Enhanced Voiceover Toggle */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 text-xs">
+                  <Button variant="ghost" size="sm" className="h-9 text-sm bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 hover:bg-slate-700/50 text-slate-200">
                     {voiceoverEnabled ? (
-                      <Volume2 className="w-3 h-3 mr-1" />
+                      <Volume2 className="w-4 h-4 mr-2 text-emerald-400" />
                     ) : (
-                      <VolumeX className="w-3 h-3 mr-1" />
+                      <VolumeX className="w-4 h-4 mr-2 text-red-400" />
                     )}
-                    {voiceoverEnabled ? 'Audio On' : 'Audio Off'}
-                    <ChevronDown className="w-3 h-3 ml-1" />
+                    <span className={voiceoverEnabled ? 'text-emerald-300' : 'text-red-300'}>
+                      {voiceoverEnabled ? 'Audio On' : 'Audio Off'}
+                    </span>
+                    <ChevronDown className="w-4 h-4 ml-2 text-slate-400" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-40 bg-popover border-border">
+                <DropdownMenuContent className="w-44 bg-slate-900/95 backdrop-blur-sm border-slate-700/50">
                   <DropdownMenuItem 
                     onClick={() => onVoiceoverToggle(true)}
-                    className="flex items-center p-3"
+                    className="flex items-center p-3 hover:bg-slate-800/50 text-slate-200"
                   >
-                    <Volume2 className="w-4 h-4 mr-2" />
-                    Audio On
+                    <Volume2 className="w-4 h-4 mr-3 text-emerald-400" />
+                    <span className="text-emerald-300">Audio On</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={() => onVoiceoverToggle(false)}
-                    className="flex items-center p-3"
+                    className="flex items-center p-3 hover:bg-slate-800/50 text-slate-200"
                   >
-                    <VolumeX className="w-4 h-4 mr-2" />
-                    Audio Off
+                    <VolumeX className="w-4 h-4 mr-3 text-red-400" />
+                    <span className="text-red-300">Audio Off</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
 
-            {/* Send Button */}
+            {/* Enhanced Send Button */}
             <Button 
               size="icon" 
-              variant="ghost" 
-              className="h-8 w-8"
+              className="h-10 w-10 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg"
               onClick={handleSubmit}
               disabled={isLoading || !query.trim()}
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <ArrowUp className="w-4 h-4" />
+                <ArrowUp className="w-5 h-5 text-white" />
               )}
             </Button>
           </div>
         </div>
 
-        {/* Helper Text */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        {/* Enhanced Helper Text */}
+        <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
-            <span>Visual AI with {voiceoverEnabled ? 'Voiceover' : 'Silent Mode'}</span>
+            <span className="text-slate-300">
+              Visual AI with{' '}
+              <span className={voiceoverEnabled ? 'text-emerald-400 font-medium' : 'text-red-400 font-medium'}>
+                {voiceoverEnabled ? 'Voiceover' : 'Silent Mode'}
+              </span>
+            </span>
           </div>
-          <div className="text-xs">
-            Use <kbd className="px-1 py-0.5 bg-muted rounded text-xs">shift + return</kbd> for new line
+          <div className="text-xs text-slate-400">
+            Use <kbd className="px-2 py-1 bg-slate-800/50 border border-slate-700/50 rounded text-xs text-slate-300">shift + return</kbd> for new line
           </div>
         </div>
       </div>
 
-      {/* Suggestion Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl mx-auto">
+      {/* Enhanced Suggestion Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl mx-auto">
         {suggestions.map((suggestion, index) => (
           <Card
             key={index}
-            className="p-3 cursor-pointer hover:bg-accent/50 transition-colors border border-border/20 bg-card/50"
+            className="p-4 cursor-pointer hover:bg-slate-800/30 transition-all duration-200 border border-slate-700/30 bg-slate-900/20 backdrop-blur-sm hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10"
             onClick={() => setQuery(suggestion)}
           >
-            <p className="text-sm text-left">{suggestion}</p>
+            <p className="text-sm text-left text-slate-200">{suggestion}</p>
           </Card>
         ))}
       </div>
 
-      {/* Refresh Prompts */}
+      {/* Enhanced Refresh Prompts */}
       <div className="text-center">
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-emerald-400 hover:bg-slate-800/30 transition-colors">
           <RefreshCw className="w-4 h-4 mr-2" />
           Refresh prompts
         </Button>
       </div>
 
-      {/* Footer */}
-      <p className="text-xs text-muted-foreground text-center">
-        Visual AI can make mistakes. Please double-check responses.
+      {/* Enhanced Footer */}
+      <p className="text-xs text-slate-500 text-center">
+        Visual AI can make mistakes. Please <span className="text-emerald-400">double-check</span> responses.
       </p>
     </div>
   );
