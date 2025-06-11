@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button"
 
 export default function Navbar() {
   return (
-    <nav className="bg-black text-white px-4 py-2 mx-4 mt-4 rounded-full">
-      <div className="flex items-center justify-between max-w-4xl mx-auto">
+    <nav className="bg-black text-white px-6 py-2 mx-4 mt-4 rounded-full w-fit">
+      <div className="flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full flex items-center justify-center">
@@ -16,7 +16,7 @@ export default function Navbar() {
         </div>
 
         {/* Navigation Links */}
-        <div className="hidden md:flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-4 mx-8">
           <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm">
             Product
           </a>
