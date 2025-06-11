@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUp, X, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import { ArrowUp, X, SkipBack, SkipForward, Volume2, VolumeX, MessageSquare } from 'lucide-react';
 
 interface Slide {
   id: string;
@@ -31,6 +31,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+  const [showFollowUpSection, setShowFollowUpSection] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const transitionSfxRef = useRef<HTMLAudioElement | null>(null);
 
@@ -231,6 +232,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
       stopAudio();
       onFollowUp(followUpQuestion);
       setFollowUpQuestion('');
+      setShowFollowUpSection(false);
     }
   };
 
@@ -251,7 +253,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col font-pixelify">
-      {/* Header Controls - Fixed height with proper spacing */}
+      {/* Header Controls */}
       <div className="h-16 md:h-20 flex items-center justify-between px-4 md:px-6 bg-gradient-to-b from-black/90 to-black/60 backdrop-blur-sm relative z-30 shrink-0">
         <div className="flex items-center space-x-2 md:space-x-4">
           <h1 className="text-base md:text-xl font-bold text-white">Visual AI Explainer</h1>
@@ -263,6 +265,16 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           )}
         </div>
         <div className="flex items-center space-x-2 md:space-x-4">
+          {!isLoading && slides.length > 0 && (
+            <Button
+              onClick={() => setShowFollowUpSection(!showFollowUpSection)}
+              variant="ghost"
+              size="sm"
+              className={`text-white hover:bg-white/10 ${showFollowUpSection ? 'bg-white/20' : ''}`}
+            >
+              <MessageSquare className="w-4 h-4 md:w-5 md:h-5" />
+            </Button>
+          )}
           {voiceoverEnabled && !isLoading && slides.length > 0 && (
             <Button
               onClick={toggleMute}
@@ -284,7 +296,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
         </div>
       </div>
 
-      {/* Main Cinema Screen - Takes remaining space between header and footer */}
+      {/* Main Cinema Screen */}
       <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0 }}>
         {/* Navigation Buttons */}
         {!isLoading && slides.length > 0 && (
@@ -311,7 +323,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           </>
         )}
 
-        {/* Content Container - Properly centered and spaced */}
+        {/* Content Container */}
         <div className="h-full flex items-center justify-center p-4 md:p-8">
           <div className="w-full max-w-6xl mx-auto h-full flex flex-col justify-center">
             {isLoading ? (
@@ -351,7 +363,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                     </div>
                   </div>
                   
-                  {/* Visual Section - Takes most space */}
+                  {/* Visual Section */}
                   <div className="flex-1 flex items-center justify-center px-4 md:px-8 min-h-0">
                     {slides[currentSlide]?.imageUrl ? (
                       <div className={`relative transition-all duration-500 delay-200 ease-out transform-gpu w-full max-w-4xl ${
@@ -420,8 +432,8 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
         </div>
       </div>
 
-      {/* Follow-up Section - Fixed height at bottom */}
-      {!isLoading && slides.length > 0 && (
+      {/* Follow-up Section - Only shown when enabled */}
+      {!isLoading && slides.length > 0 && showFollowUpSection && (
         <div className={`shrink-0 p-4 md:p-6 bg-gradient-to-t from-black/90 to-black/60 backdrop-blur-sm transition-all duration-500 ${
           showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}>
@@ -456,3 +468,5 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 };
 
 export default CinemaMode;
+
+</edits_to_apply>
