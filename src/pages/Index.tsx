@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Brain } from "lucide-react";
 import CinemaMode from '../components/CinemaMode';
 import AnimatedCharacter from '../components/AnimatedCharacter';
 import QuerySection from '../components/QuerySection';
+import Navbar from '../components/Navbar';
 import { apiService } from '../services/apiService';
 import { useTTS } from '../hooks/useTTS';
 import { toast } from 'sonner';
@@ -122,22 +121,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen gradient-bg text-foreground">
-      {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b border-border/10">
-        <div className="flex items-center gap-2">
-          <Brain className="w-5 h-5" />
-          <span className="font-semibold">Visual AI</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-medium">
-            U
-          </div>
-        </div>
-      </header>
+      {/* New Navbar */}
+      <Navbar />
 
       {/* Main Content */}
-      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4">
+      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)] p-4">
         <QuerySection
           onSubmit={handleQuerySubmit}
           isLoading={isLoading}
