@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ThemeToggle } from "@/components/ThemeToggle";
 import CinemaMode from '../components/CinemaMode';
@@ -124,8 +125,8 @@ const Index = () => {
       {/* Navbar */}
       <Navbar />
 
-      {/* Main Content */}
-      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4">
+      {/* Main Content with increased top spacing */}
+      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-140px)] p-4 pt-16">
         <QuerySection
           onSubmit={handleQuerySubmit}
           isLoading={isLoading}
