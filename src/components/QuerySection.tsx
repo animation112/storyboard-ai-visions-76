@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
 }) => {
   const [query, setQuery] = useState('');
   const [artStyle, setArtStyle] = useState('cute-minimal-watercolor');
+  const [showSuggestions, setShowSuggestions] = useState(true);
 
   const handleSubmit = () => {
     if (query.trim() && !isLoading) {
@@ -32,6 +34,19 @@ const QuerySection: React.FC<QuerySectionProps> = ({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
+    }
+  };
+
+  const handleQueryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setQuery(e.target.value);
+    if (e.target.value.trim()) {
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleQueryFocus = () => {
+    if (query.trim()) {
+      setShowSuggestions(false);
     }
   };
 
@@ -80,7 +95,8 @@ const QuerySection: React.FC<QuerySectionProps> = ({
           <Textarea
             placeholder="How can Visual AI help you today?"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleQueryChange}
+            onFocus={handleQueryFocus}
             onKeyDown={handleKeyPress}
             className="min-h-[100px] resize-none pr-20 pb-16 bg-card/50 border-border/20"
             disabled={isLoading}
@@ -172,26 +188,45 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         </div>
       </div>
 
-      {/* Suggestion Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl mx-auto">
-        {suggestions.map((suggestion, index) => (
-          <Card
-            key={index}
-            className="p-3 cursor-pointer hover:bg-accent/50 transition-colors border border-border/20 bg-card/50"
-            onClick={() => setQuery(suggestion)}
-          >
-            <p className="text-sm text-left">{suggestion}</p>
-          </Card>
-        ))}
-      </div>
+      {/* Animated Suggestion Cards */}
+      {showSuggestions && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl mx-auto">
+          {suggestions.map((suggestion, index) => (
+            <Card
+              key={index}
+              className={`p-3 cursor-pointer hover:bg-accent/50 transition-all duration-300 border border-border/20 bg-card/50 animate-fade-in`}
+              style={{
+                animationDelay: `${index * 100}ms`,
+                animationFillMode: 'both'
+              }}
+              onClick={() => {
+                setQuery(suggestion);
+                setShowSuggestions(false);
+              }}
+            >
+              <p className="text-sm text-left">{suggestion}</p>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Refresh Prompts */}
-      <div className="text-center">
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Refresh prompts
-        </Button>
-      </div>
+      {!showSuggestions && (
+        <div className="text-center animate-fade-in">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => {
+              setQuery('');
+              setShowSuggestions(true);
+            }}
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Show suggestions
+          </Button>
+        </div>
+      )}
 
       {/* Footer */}
       <p className="text-xs text-muted-foreground text-center">
