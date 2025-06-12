@@ -468,5 +468,3 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 };
 
 export default CinemaMode;
-
-</edits_to_apply>
