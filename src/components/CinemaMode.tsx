@@ -352,8 +352,8 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                   onClick={togglePlay}
                 >
                   
-                  {/* Title Section */}
-                  <div className="text-center py-4 md:py-6 shrink-0">
+                  {/* Title Section with more top spacing */}
+                  <div className="text-center py-8 md:py-12 shrink-0">
                     <div className={`transition-all duration-500 ease-out ${
                       showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
                     }`}>
@@ -363,8 +363,8 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                     </div>
                   </div>
                   
-                  {/* Visual Section */}
-                  <div className="flex-1 flex items-center justify-center px-4 md:px-8 min-h-0">
+                  {/* Visual Section with more spacing from title and caption */}
+                  <div className="flex-1 flex items-center justify-center px-4 md:px-8 py-6 md:py-8 min-h-0">
                     {slides[currentSlide]?.imageUrl ? (
                       <div className={`relative transition-all duration-500 delay-200 ease-out transform-gpu w-full max-w-4xl ${
                         showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
@@ -398,12 +398,12 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                     )}
                   </div>
                   
-                  {/* Text Section */}
-                  <div className="px-4 md:px-8 py-4 md:py-6 shrink-0">
+                  {/* Text Section with more bottom spacing */}
+                  <div className="px-4 md:px-8 py-8 md:py-12 shrink-0">
                     <div className={`transition-all duration-500 delay-400 ease-out ${
                       showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                     }`}>
-                      <div className="bg-black/40 backdrop-blur-sm rounded-lg p-3 md:p-4 mx-auto max-w-3xl">
+                      <div className="bg-black/40 backdrop-blur-sm rounded-lg p-4 md:p-6 mx-auto max-w-3xl">
                         <p 
                           className="text-sm md:text-base lg:text-lg text-white leading-relaxed text-center font-pixelify font-medium"
                           dangerouslySetInnerHTML={{ 
