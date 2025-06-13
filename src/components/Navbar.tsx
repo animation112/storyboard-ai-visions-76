@@ -1,10 +1,9 @@
-
 import { Button } from "@/components/ui/button"
 
 export default function Navbar() {
   return (
-    <nav className="flex justify-center px-4 mt-4">
-      <div className="bg-black/40 backdrop-blur-md border border-white/10 text-white px-16 py-3 rounded-full w-full max-w-5xl shadow-2xl shadow-black/25">
+    <nav className="sticky top-0 z-50 flex justify-center px-4 pt-4 pb-2">
+      <div className="bg-black/40 backdrop-blur-md border border-white/10 text-white px-16 py-3 rounded-full w-full max-w-5xl shadow-2xl shadow-black/25 transition-all duration-300">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
