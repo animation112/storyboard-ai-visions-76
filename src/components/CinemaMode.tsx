@@ -1,470 +1,565 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowUp, X, SkipBack, SkipForward, Volume2, VolumeX, MessageSquare } from 'lucide-react';
+
+"use client"
+
+import type React from "react"
+import { useState, useEffect, useRef } from "react"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { ArrowUp, X, ChevronLeft, ChevronRight, Play, Pause, Volume2, MessageSquare } from "lucide-react"
 
 interface Slide {
-  id: string;
-  title: string;
-  content: string;
-  imageUrl?: string;
-  commentary: string;
-  voiceoverScript: string;
-  audioUrl?: string;
+  id: string
+  title: string
+  content: string
+  imageUrl?: string
+  commentary: string
+  voiceoverScript: string
+  audioUrl?: string
+  duration?: string
 }
 
 interface CinemaModeProps {
-  slides: Slide[];
-  isLoading: boolean;
-  onClose: () => void;
-  onFollowUp: (question: string) => void;
+  slides: Slide[]
+  isLoading: boolean
+  onClose: () => void
+  onFollowUp: (question: string) => void
 }
 
 const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onFollowUp }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [followUpQuestion, setFollowUpQuestion] = useState('');
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [voiceoverEnabled, setVoiceoverEnabled] = useState(true);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showContent, setShowContent] = useState(false);
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
-  const [showFollowUpSection, setShowFollowUpSection] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const transitionSfxRef = useRef<HTMLAudioElement | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [followUpQuestion, setFollowUpQuestion] = useState("")
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false)
+  const [voiceoverEnabled, setVoiceoverEnabled] = useState(true)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [showContent, setShowContent] = useState(false)
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">("right")
+  const [showFollowUpSection, setShowFollowUpSection] = useState(false)
+  const [activeTab, setActiveTab] = useState<"info" | "chapters" | "next">("info")
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const transitionSfxRef = useRef<HTMLAudioElement | null>(null)
+  const progressRef = useRef<HTMLDivElement | null>(null)
+  const [progress, setProgress] = useState(0)
 
   // Initialize transition sound effect
   useEffect(() => {
-    transitionSfxRef.current = new Audio('https://raw.githubusercontent.com/Panshief12/storyboard-ai-visions/main/447808__florianreichelt__swishes-and-swooshes.mp3');
-    transitionSfxRef.current.volume = 0.3; // Lower volume for sfx
-    
+    transitionSfxRef.current = new Audio(
+      "https://raw.githubusercontent.com/Panshief12/storyboard-ai-visions/main/447808__florianreichelt__swishes-and-swooshes.mp3",
+    )
+    transitionSfxRef.current.volume = 0.3 // Lower volume for sfx
+
     return () => {
       if (transitionSfxRef.current) {
-        transitionSfxRef.current = null;
+        transitionSfxRef.current = null
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // Play transition sound effect
   const playTransitionSfx = () => {
     if (transitionSfxRef.current && !isMuted) {
-      transitionSfxRef.current.currentTime = 0;
-      transitionSfxRef.current.play().catch(error => {
-        console.log('Transition SFX play error:', error);
-      });
+      transitionSfxRef.current.currentTime = 0
+      transitionSfxRef.current.play().catch((error) => {
+        console.log("Transition SFX play error:", error)
+      })
     }
-  };
+  }
 
   // Detect if slides have audio to determine initial voiceover state
   useEffect(() => {
     if (slides.length > 0) {
-      const hasAudio = slides.some(slide => slide.audioUrl);
-      setVoiceoverEnabled(hasAudio);
+      const hasAudio = slides.some((slide) => slide.audioUrl)
+      setVoiceoverEnabled(hasAudio)
     }
-  }, [slides]);
+  }, [slides])
 
   useEffect(() => {
     if (slides.length > 0 && !isLoading && voiceoverEnabled) {
-      setIsPlaying(true);
-      playCurrentSlideAudio();
+      setIsPlaying(true)
+      playCurrentSlideAudio()
     } else if (slides.length > 0 && !isLoading && !voiceoverEnabled) {
-      setIsPlaying(true);
+      setIsPlaying(true)
     }
-  }, [slides, isLoading, voiceoverEnabled]);
+  }, [slides, isLoading, voiceoverEnabled])
 
   useEffect(() => {
     if (isPlaying && !isLoading && voiceoverEnabled) {
-      playCurrentSlideAudio();
+      playCurrentSlideAudio()
     } else {
-      stopAudio();
+      stopAudio()
     }
-  }, [currentSlide, isPlaying, voiceoverEnabled]);
+  }, [currentSlide, isPlaying, voiceoverEnabled])
 
   // Show content with animation after slides load
   useEffect(() => {
     if (slides.length > 0 && !isLoading) {
       const timer = setTimeout(() => {
-        setShowContent(true);
-      }, 300);
-      return () => clearTimeout(timer);
+        setShowContent(true)
+      }, 300)
+      return () => clearTimeout(timer)
     } else {
-      setShowContent(false);
+      setShowContent(false)
     }
-  }, [slides, isLoading]);
+  }, [slides, isLoading])
 
-  // Enhanced text highlighting function
-  const highlightText = (text: string) => {
-    // Keywords to highlight with different colors
-    const highlights = {
-      important: ['important', 'crucial', 'key', 'main', 'primary', 'essential', 'critical'],
-      technical: ['algorithm', 'data', 'process', 'system', 'computer', 'AI', 'artificial intelligence', 'neural', 'network'],
-      action: ['learn', 'analyze', 'process', 'understand', 'recognize', 'identify', 'generate', 'create'],
-      emphasis: ['amazing', 'incredible', 'powerful', 'smart', 'intelligent', 'advanced', 'sophisticated']
-    };
-
-    let highlightedText = text;
-    
-    // Apply highlighting for each category
-    Object.entries(highlights).forEach(([category, words]) => {
-      words.forEach(word => {
-        const regex = new RegExp(`\\b(${word})\\b`, 'gi');
-        const colorClass = {
-          important: 'text-yellow-400 font-semibold',
-          technical: 'text-blue-400 font-medium',
-          action: 'text-green-400 font-medium',
-          emphasis: 'text-purple-400 font-semibold'
-        }[category];
-        
-        highlightedText = highlightedText.replace(regex, `<span class="${colorClass}">$1</span>`);
-      });
-    });
-
-    return highlightedText;
-  };
+  // Update progress bar
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    if (isPlaying && !isLoading) {
+      let currentProgress = 0
+      interval = setInterval(() => {
+        if (currentProgress < 100) {
+          currentProgress += 0.1
+          setProgress(currentProgress)
+        } else {
+          clearInterval(interval)
+          if (currentSlide < slides.length - 1) {
+            advanceSlideWithAnimation(currentSlide + 1)
+          } else {
+            setIsPlaying(false)
+          }
+        }
+      }, 50)
+    }
+    return () => clearInterval(interval)
+  }, [isPlaying, currentSlide, isLoading])
 
   // Helper function to advance slide with animation
   const advanceSlideWithAnimation = (nextSlideIndex: number) => {
-    playTransitionSfx(); // Play sound effect
-    setSlideDirection('right');
-    setIsTransitioning(true);
+    playTransitionSfx() // Play sound effect
+    setSlideDirection("right")
+    setIsTransitioning(true)
+    setProgress(0)
     setTimeout(() => {
-      setCurrentSlide(nextSlideIndex);
-      setIsTransitioning(false);
-    }, 250);
-  };
+      setCurrentSlide(nextSlideIndex)
+      setIsTransitioning(false)
+    }, 250)
+  }
 
   // Play audio for the current slide
   const playCurrentSlideAudio = () => {
-    if (isMuted || !slides[currentSlide]?.audioUrl || !voiceoverEnabled) return;
+    if (isMuted || !slides[currentSlide]?.audioUrl || !voiceoverEnabled) return
 
-    stopAudio();
-    
-    const audio = new Audio(slides[currentSlide].audioUrl);
-    audioRef.current = audio;
-    
+    stopAudio()
+
+    const audio = new Audio(slides[currentSlide].audioUrl)
+    audioRef.current = audio
+
     audio.onloadeddata = () => {
-      console.log('Audio loaded for slide:', currentSlide);
-    };
-    
+      console.log("Audio loaded for slide:", currentSlide)
+    }
+
     audio.onplay = () => {
-      setIsAudioPlaying(true);
-      console.log('Audio started playing for slide:', currentSlide);
-    };
-    
+      setIsAudioPlaying(true)
+      console.log("Audio started playing for slide:", currentSlide)
+    }
+
     audio.onended = () => {
-      setIsAudioPlaying(false);
-      console.log('Audio ended for slide:', currentSlide);
-      
+      setIsAudioPlaying(false)
+      console.log("Audio ended for slide:", currentSlide)
+
       // Auto-advance to next slide with animation when audio finishes
       if (isPlaying && currentSlide < slides.length - 1) {
         setTimeout(() => {
-          advanceSlideWithAnimation(currentSlide + 1);
-        }, 500); // Small delay before advancing
+          advanceSlideWithAnimation(currentSlide + 1)
+        }, 500) // Small delay before advancing
       } else if (currentSlide >= slides.length - 1) {
-        setIsPlaying(false);
+        setIsPlaying(false)
       }
-    };
-    
+    }
+
     audio.onerror = (e) => {
-      console.error('Audio error:', e);
-      setIsAudioPlaying(false);
-    };
-    
-    audio.play().catch(error => {
-      console.error('Error playing audio:', error);
-      setIsAudioPlaying(false);
-    });
-  };
+      console.error("Audio error:", e)
+      setIsAudioPlaying(false)
+    }
+
+    audio.play().catch((error) => {
+      console.error("Error playing audio:", error)
+      setIsAudioPlaying(false)
+    })
+  }
 
   // Stop audio playback
   const stopAudio = () => {
     if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      audioRef.current = null
     }
-    setIsAudioPlaying(false);
-  };
+    setIsAudioPlaying(false)
+  }
 
   // Move to the next slide
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
-      playTransitionSfx(); // Play sound effect
-      advanceSlideWithAnimation(currentSlide + 1);
+      playTransitionSfx() // Play sound effect
+      advanceSlideWithAnimation(currentSlide + 1)
     } else {
-      setIsPlaying(false);
+      setIsPlaying(false)
     }
-  };
+  }
 
   // Move to the previous slide
   const prevSlide = () => {
     if (currentSlide > 0) {
-      playTransitionSfx(); // Play sound effect
-      setSlideDirection('left');
-      setIsTransitioning(true);
+      playTransitionSfx() // Play sound effect
+      setSlideDirection("left")
+      setIsTransitioning(true)
+      setProgress(0)
       setTimeout(() => {
-        setCurrentSlide(currentSlide - 1);
-        setIsTransitioning(false);
-      }, 250);
+        setCurrentSlide(currentSlide - 1)
+        setIsTransitioning(false)
+      }, 250)
     }
-  };
+  }
 
   // Toggle play/pause
   const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
+    setIsPlaying(!isPlaying)
+  }
 
   // Toggle mute/unmute
   const toggleMute = () => {
-    setIsMuted(!isMuted);
+    setIsMuted(!isMuted)
     if (!isMuted) {
-      stopAudio();
+      stopAudio()
     } else if (isPlaying && voiceoverEnabled) {
-      playCurrentSlideAudio();
+      playCurrentSlideAudio()
     }
-  };
+  }
 
   // Handle follow-up question submission
   const handleFollowUp = () => {
     if (followUpQuestion.trim()) {
-      stopAudio();
-      onFollowUp(followUpQuestion);
-      setFollowUpQuestion('');
-      setShowFollowUpSection(false);
+      stopAudio()
+      onFollowUp(followUpQuestion)
+      setFollowUpQuestion("")
+      setShowFollowUpSection(false)
     }
-  };
+  }
 
   // Handle keyboard press for follow-up question submission
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleFollowUp();
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleFollowUp()
     }
-  };
+  }
 
   // Cleanup audio on unmount
   useEffect(() => {
     return () => {
-      stopAudio();
-    };
-  }, []);
+      stopAudio()
+    }
+  }, [])
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col font-pixelify">
-      {/* Header Controls */}
-      <div className="h-16 md:h-20 flex items-center justify-between px-4 md:px-6 bg-gradient-to-b from-black/90 to-black/60 backdrop-blur-sm relative z-30 shrink-0">
-        <div className="flex items-center space-x-2 md:space-x-4">
-          <h1 className="text-base md:text-xl font-bold text-white">Visual AI Explainer</h1>
-          {!isLoading && slides.length > 0 && (
-            <div className="text-gray-300 flex items-center space-x-2 text-xs md:text-sm">
-              <span>{currentSlide + 1} of {slides.length}</span>
-              {voiceoverEnabled && isAudioPlaying && <Volume2 className="w-3 h-3 md:w-4 md:h-4 text-green-400" />}
+    <div className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center font-sans">
+      {/* Blurred background image for ambiance */}
+      {slides.length > 0 && slides[currentSlide]?.imageUrl && (
+        <div
+          className="absolute inset-0 opacity-20 bg-cover bg-center blur-2xl"
+          style={{ backgroundImage: `url(${slides[currentSlide].imageUrl})` }}
+        />
+      )}
+
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10" />
+
+      {/* Close button - top left */}
+      <button
+        onClick={onClose}
+        className="absolute top-6 left-6 z-50 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/50 transition-all duration-200"
+      >
+        <X className="w-5 h-5 text-white/80" />
+      </button>
+
+      {isLoading ? (
+        <div className="relative z-20 flex items-center justify-center">
+          <div className="bg-black/40 backdrop-blur-xl p-8 rounded-3xl border border-white/10 text-center space-y-6">
+            <div className="w-16 h-16 border-4 border-white/20 border-t-white/80 rounded-full animate-spin mx-auto" />
+            <div>
+              <p className="text-white/90 text-2xl font-medium">Creating your visual story</p>
+              <p className="text-white/60 text-base mt-2">Generating images and audio narration</p>
+            </div>
+          </div>
+        </div>
+      ) : slides.length > 0 ? (
+        <>
+          {/* Main content area */}
+          <div
+            className={`relative z-20 max-w-4xl w-full flex flex-col items-center justify-center px-3 py-4 transition-opacity duration-500 ${
+              showContent ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {/* Main image display */}
+            <div
+              className={`relative w-full max-w-3xl aspect-video mb-3 transition-all duration-500 ${
+                isTransitioning
+                  ? slideDirection === "right"
+                    ? "translate-x-[-5%] opacity-0"
+                    : "translate-x-[5%] opacity-0"
+                  : "translate-x-0 opacity-100"
+              }`}
+            >
+              {slides[currentSlide]?.imageUrl && (
+                <>
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-white/0 rounded-3xl blur-xl transform scale-105 -z-10"></div>
+
+                  {/* Main image */}
+                  <img
+                    src={slides[currentSlide].imageUrl || "/placeholder.svg"}
+                    alt={slides[currentSlide].title}
+                    className="w-full h-full object-cover rounded-3xl shadow-2xl"
+                  />
+
+                  {/* Play/pause overlay */}
+                  <div
+                    className={`absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-3xl transition-opacity duration-300 ${
+                      isPlaying ? "opacity-0 pointer-events-none" : "opacity-100"
+                    }`}
+                    onClick={togglePlay}
+                  >
+                    <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
+                      <Play className="w-10 h-10 text-white fill-white ml-1" />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Info panel - Inspired by the visionOS design */}
+            <div className="relative w-full max-w-xl">
+              <div className="bg-white/10 backdrop-blur-xl rounded-lg border border-white/10 overflow-hidden">
+                <div className="flex items-center p-2">
+                  {/* Thumbnail */}
+                  <div className="w-16 h-12 rounded-md overflow-hidden flex-shrink-0 mr-2">
+                    <img
+                      src={slides[currentSlide]?.imageUrl || "/placeholder.svg"}
+                      alt="Thumbnail"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1">
+                    <h2 className="text-white/90 text-sm font-medium">{slides[currentSlide]?.title}</h2>
+                    <p className="text-white/70 text-xs mt-0.5 line-clamp-1">{slides[currentSlide]?.voiceoverScript}</p>
+                    <div className="flex items-center mt-0.5 text-white/60 text-[10px]">
+                      <span>Visual Explainer</span>
+                      <span className="mx-1">•</span>
+                      <span>{slides[currentSlide]?.duration || "1 min"}</span>
+                      {isAudioPlaying && (
+                        <>
+                          <span className="mx-1">•</span>
+                          <Volume2 className="w-2 h-2 text-white/80" />
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Controls */}
+                  <div className="flex items-center space-x-1.5 ml-2">
+                    <button
+                      onClick={togglePlay}
+                      className="bg-white/20 hover:bg-white/30 transition-colors duration-200 rounded-full px-2 py-1 text-white/90 text-xs font-medium flex items-center"
+                    >
+                      {isPlaying ? (
+                        <>
+                          <Pause className="w-2.5 h-2.5 mr-1" />
+                          Pause
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-2.5 h-2.5 mr-1" />
+                          Play
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => setShowFollowUpSection(!showFollowUpSection)}
+                      className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200 flex items-center justify-center"
+                    >
+                      <MessageSquare className="w-3 h-3 text-white/80" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="px-2 pt-0.5">
+                  <div className="flex space-x-1 justify-center">
+                    <button
+                      onClick={() => setActiveTab("info")}
+                      className={`px-2 py-1 rounded-full text-[10px] font-medium transition-colors duration-200 ${
+                        activeTab === "info" ? "bg-white/20 text-white/90" : "text-white/60 hover:text-white/80"
+                      }`}
+                    >
+                      Info
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("chapters")}
+                      className={`px-2 py-1 rounded-full text-[10px] font-medium transition-colors duration-200 ${
+                        activeTab === "chapters" ? "bg-white/20 text-white/90" : "text-white/60 hover:text-white/80"
+                      }`}
+                    >
+                      Chapters
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("next")}
+                      className={`px-2 py-1 rounded-full text-[10px] font-medium transition-colors duration-200 ${
+                        activeTab === "next" ? "bg-white/20 text-white/90" : "text-white/60 hover:text-white/80"
+                      }`}
+                    >
+                      Up Next
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tab content */}
+                <div className="p-2">
+                  {activeTab === "info" && (
+                    <div className="text-white/80 text-[10px]">{slides[currentSlide]?.content}</div>
+                  )}
+
+                  {activeTab === "chapters" && (
+                    <div className="space-y-1 max-h-24 overflow-y-auto">
+                      {slides.map((slide, index) => (
+                        <button
+                          key={slide.id}
+                          onClick={() => {
+                            setCurrentSlide(index)
+                            setProgress(0)
+                          }}
+                          className={`w-full text-left p-1 rounded-md flex items-center ${
+                            currentSlide === index ? "bg-white/20" : "hover:bg-white/10"
+                          }`}
+                        >
+                          <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center mr-1.5">
+                            <span className="text-[10px] text-white/90">{index + 1}</span>
+                          </div>
+                          <span className={`text-[10px] ${currentSlide === index ? "text-white/90" : "text-white/70"}`}>
+                            {slide.title}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {activeTab === "next" && (
+                    <div className="space-y-1 max-h-24 overflow-y-auto">
+                      {slides.slice(currentSlide + 1, currentSlide + 4).map((slide, index) => (
+                        <button
+                          key={slide.id}
+                          onClick={() => {
+                            setCurrentSlide(currentSlide + index + 1)
+                            setProgress(0)
+                          }}
+                          className="w-full text-left hover:bg-white/10 rounded-md p-1 flex items-center"
+                        >
+                          <div className="w-8 h-8 rounded-sm overflow-hidden mr-1.5 flex-shrink-0">
+                            <img
+                              src={slide.imageUrl || "/placeholder.svg"}
+                              alt={slide.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-white/90">{slide.title}</p>
+                            <p className="text-[8px] text-white/60 mt-0.5">Coming up next</p>
+                          </div>
+                        </button>
+                      ))}
+
+                      {currentSlide >= slides.length - 1 && (
+                        <div className="text-center text-white/60 py-1 text-[10px]">End of presentation</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Progress bar */}
+                <div className="px-2 pb-2">
+                  <div className="h-0.5 bg-white/10 rounded-full overflow-hidden" ref={progressRef}>
+                    <div
+                      className="h-full bg-white/80 transition-all duration-300 ease-linear"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-0.5 text-[8px] text-white/60">
+                    <span>{Math.floor((progress / 100) * 60)}s</span>
+                    <span>1:00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation arrows */}
+            <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 flex justify-between px-2 z-30 pointer-events-none">
+              <button
+                onClick={prevSlide}
+                disabled={currentSlide === 0}
+                className={`w-8 h-8 rounded-full bg-black/30 backdrop-blur-md border border-white/10 flex items-center justify-center pointer-events-auto transition-all duration-200 ${
+                  currentSlide === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-black/50"
+                }`}
+              >
+                <ChevronLeft className="w-4 h-4 text-white/80" />
+              </button>
+
+              <button
+                onClick={nextSlide}
+                disabled={currentSlide >= slides.length - 1}
+                className={`w-8 h-8 rounded-full bg-black/30 backdrop-blur-md border border-white/10 flex items-center justify-center pointer-events-auto transition-all duration-200 ${
+                  currentSlide >= slides.length - 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-black/50"
+                }`}
+              >
+                <ChevronRight className="w-4 h-4 text-white/80" />
+              </button>
+            </div>
+          </div>
+
+          {/* Follow-up section */}
+          {showFollowUpSection && (
+            <div className="fixed bottom-0 inset-x-0 p-2 z-30">
+              <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-xl rounded-lg border border-white/10 overflow-hidden">
+                <div className="p-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-white/90 text-[10px] font-medium">Ask a follow-up question</h3>
+                    <button onClick={() => setShowFollowUpSection(false)} className="text-white/60 hover:text-white/90">
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+
+                  <div className="flex space-x-1.5">
+                    <Textarea
+                      value={followUpQuestion}
+                      onChange={(e) => setFollowUpQuestion(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="What would you like to know more about?"
+                      className="flex-1 bg-white/5 border-white/10 text-white/90 placeholder-white/40 resize-none focus:ring-1 focus:ring-white/20 focus:border-white/20 text-[10px] rounded-md"
+                      rows={1}
+                    />
+
+                    <Button
+                      onClick={handleFollowUp}
+                      disabled={!followUpQuestion.trim()}
+                      className="bg-white/20 hover:bg-white/30 text-white border-0 self-end transition-all duration-200 rounded-md px-2 py-1 h-6"
+                    >
+                      <ArrowUp className="w-2.5 h-2.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
-        </div>
-        <div className="flex items-center space-x-2 md:space-x-4">
-          {!isLoading && slides.length > 0 && (
-            <Button
-              onClick={() => setShowFollowUpSection(!showFollowUpSection)}
-              variant="ghost"
-              size="sm"
-              className={`text-white hover:bg-white/10 ${showFollowUpSection ? 'bg-white/20' : ''}`}
-            >
-              <MessageSquare className="w-4 h-4 md:w-5 md:h-5" />
-            </Button>
-          )}
-          {voiceoverEnabled && !isLoading && slides.length > 0 && (
-            <Button
-              onClick={toggleMute}
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/10"
-            >
-              {isMuted ? <VolumeX className="w-4 h-4 md:w-5 md:h-5" /> : <Volume2 className="w-4 h-4 md:w-5 md:h-5" />}
-            </Button>
-          )}
-          <Button
-            onClick={onClose}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/10"
-          >
-            <X className="w-4 h-4 md:w-5 md:h-5" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Cinema Screen */}
-      <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0 }}>
-        {/* Navigation Buttons */}
-        {!isLoading && slides.length > 0 && (
-          <>
-            <Button
-              onClick={prevSlide}
-              disabled={currentSlide === 0}
-              variant="ghost"
-              size="lg"
-              className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200 z-20 h-12 w-12 md:h-16 md:w-16"
-            >
-              <SkipBack className="w-6 h-6 md:w-8 md:h-8" />
-            </Button>
-
-            <Button
-              onClick={nextSlide}
-              disabled={currentSlide >= slides.length - 1}
-              variant="ghost"
-              size="lg"
-              className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 disabled:opacity-30 transition-all duration-200 z-20 h-12 w-12 md:h-16 md:w-16"
-            >
-              <SkipForward className="w-6 h-6 md:w-8 md:h-8" />
-            </Button>
-          </>
-        )}
-
-        {/* Content Container */}
-        <div className="h-full flex items-center justify-center p-4 md:p-8">
-          <div className="w-full max-w-6xl mx-auto h-full flex flex-col justify-center">
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="text-center space-y-4 md:space-y-6">
-                  <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-white text-lg md:text-2xl font-medium">
-                    Creating your visual story{voiceoverEnabled ? ' with voiceover' : ''}...
-                  </p>
-                  <p className="text-gray-400 text-sm md:text-base">
-                    Generating images{voiceoverEnabled ? ' and audio' : ''} - this may take a moment
-                  </p>
-                </div>
-              </div>
-            ) : slides.length > 0 ? (
-              <div className="w-full h-full flex flex-col">
-                {/* Slide Container */}
-                <div 
-                  className={`w-full h-full flex flex-col transition-all duration-500 ease-out transform-gpu cursor-pointer ${
-                    isTransitioning 
-                      ? slideDirection === 'right' 
-                        ? 'animate-slide-out-left' 
-                        : 'translate-x-full opacity-0'
-                      : 'translate-x-0 opacity-100'
-                  } ${showContent ? 'animate-fade-in' : 'opacity-0'} hover:scale-[1.01]`}
-                  onClick={togglePlay}
-                >
-                  
-                  {/* Title Section with more top spacing */}
-                  <div className="text-center py-8 md:py-12 shrink-0">
-                    <div className={`transition-all duration-500 ease-out ${
-                      showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-                    }`}>
-                      <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-lg font-pixelify px-2">
-                        {slides[currentSlide]?.title}
-                      </h2>
-                    </div>
-                  </div>
-                  
-                  {/* Visual Section with more spacing from title and caption */}
-                  <div className="flex-1 flex items-center justify-center px-4 md:px-8 py-6 md:py-8 min-h-0">
-                    {slides[currentSlide]?.imageUrl ? (
-                      <div className={`relative transition-all duration-500 delay-200 ease-out transform-gpu w-full max-w-4xl ${
-                        showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                      }`}>
-                        {/* White glow background */}
-                        <div className="absolute inset-0 bg-white/20 rounded-xl blur-xl scale-110 -z-10"></div>
-                        <div className="absolute inset-0 bg-white/10 rounded-xl blur-2xl scale-125 -z-20"></div>
-                        
-                        <img 
-                          src={slides[currentSlide].imageUrl} 
-                          alt={slides[currentSlide].title}
-                          className="relative w-full h-auto object-contain rounded-xl shadow-2xl"
-                          style={{ 
-                            maxHeight: '50vh',
-                            aspectRatio: '16/9'
-                          }}
-                        />
-                        {/* Play/Pause overlay indicator */}
-                        <div className={`absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl transition-opacity duration-200 ${
-                          isPlaying ? 'opacity-0' : 'opacity-100'
-                        }`}>
-                          <div className="w-12 h-12 md:w-16 md:h-16 bg-white/80 rounded-full flex items-center justify-center">
-                            <div className="w-0 h-0 border-l-[8px] md:border-l-[12px] border-l-black border-t-[6px] md:border-t-[8px] border-t-transparent border-b-[6px] md:border-b-[8px] border-b-transparent ml-1"></div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="w-full h-64 flex items-center justify-center">
-                        <p className="text-gray-400">No image available</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Text Section with more bottom spacing */}
-                  <div className="px-4 md:px-8 py-8 md:py-12 shrink-0">
-                    <div className={`transition-all duration-500 delay-400 ease-out ${
-                      showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                    }`}>
-                      <div className="bg-black/40 backdrop-blur-sm rounded-lg p-4 md:p-6 mx-auto max-w-3xl">
-                        <p 
-                          className="text-sm md:text-base lg:text-lg text-white leading-relaxed text-center font-pixelify font-medium"
-                          dangerouslySetInnerHTML={{ 
-                            __html: highlightText(slides[currentSlide]?.voiceoverScript || '') 
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800 z-20">
-                  <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 ease-out"
-                    style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center">
-                <p className="text-white text-lg md:text-xl">No slides generated yet</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Follow-up Section - Only shown when enabled */}
-      {!isLoading && slides.length > 0 && showFollowUpSection && (
-        <div className={`shrink-0 p-4 md:p-6 bg-gradient-to-t from-black/90 to-black/60 backdrop-blur-sm transition-all duration-500 ${
-          showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        }`}>
-          <div className="max-w-4xl mx-auto">
-            <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700">
-              <div className="p-3 md:p-4 space-y-3">
-                <h3 className="text-sm md:text-base font-semibold text-white font-pixelify">Continue the story</h3>
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                  <Textarea
-                    value={followUpQuestion}
-                    onChange={(e) => setFollowUpQuestion(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Ask for more details or explore another aspect..."
-                    className="flex-1 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 resize-none focus:ring-2 focus:ring-blue-500 font-pixelify text-sm"
-                    rows={2}
-                  />
-                  <Button 
-                    onClick={handleFollowUp}
-                    disabled={!followUpQuestion.trim()}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 self-end transition-all duration-200"
-                  >
-                    <ArrowUp className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
+        </>
+      ) : (
+        <div className="relative z-20 text-white/80 text-xl">No slides available</div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default CinemaMode;
+export default CinemaMode
