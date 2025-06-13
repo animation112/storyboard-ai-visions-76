@@ -1,11 +1,10 @@
-
 "use client"
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowUp, X, ChevronLeft, ChevronRight, Play, Pause, Volume2, MessageSquare } from "lucide-react"
+import { ArrowUp, X, ChevronLeft, ChevronRight, Play, Pause, Volume2, MessageSquare, CheckCircle, Sparkles } from "lucide-react"
 
 interface Slide {
   id: string
@@ -38,6 +37,8 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   const [showFollowUpSection, setShowFollowUpSection] = useState(false)
   const [showBoxSection, setShowBoxSection] = useState(true)
   const [activeTab, setActiveTab] = useState<"info" | "chapters" | "next">("info")
+  const [isVideoComplete, setIsVideoComplete] = useState(false)
+  const [showCompletionAnimation, setShowCompletionAnimation] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const transitionSfxRef = useRef<HTMLAudioElement | null>(null)
   const progressRef = useRef<HTMLDivElement | null>(null)
@@ -115,12 +116,17 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
             advanceSlideWithAnimation(currentSlide + 1)
           } else {
             setIsPlaying(false)
+            setIsVideoComplete(true)
+            // Start completion animation after a brief delay
+            setTimeout(() => {
+              setShowCompletionAnimation(true)
+            }, 1000)
           }
         }
       }, 50)
     }
     return () => clearInterval(interval)
-  }, [isPlaying, currentSlide, isLoading])
+  }, [isPlaying, currentSlide, isLoading, slides.length])
 
   // Helper function to advance slide with animation
   const advanceSlideWithAnimation = (nextSlideIndex: number) => {
@@ -208,6 +214,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 
   // Updated toggle play function to handle image click
   const togglePlay = () => {
+    if (isVideoComplete) return // Don't allow play when video is complete
     setIsPlaying(!isPlaying)
   }
 
@@ -225,6 +232,8 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     if (followUpQuestion.trim()) {
       stopAudio()
       setShowBoxSection(false) // Hide box section
+      setIsVideoComplete(false) // Reset completion state
+      setShowCompletionAnimation(false) // Reset animation state
       onFollowUp(followUpQuestion)
       setFollowUpQuestion("")
       setShowFollowUpSection(false)
@@ -270,7 +279,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   }, [])
 
   return (
-    <div className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center font-sans">
+    <div className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center font-sans overflow-hidden">
       {/* Blurred background image for ambiance */}
       {slides.length > 0 && slides[currentSlide]?.imageUrl && (
         <div
@@ -288,6 +297,71 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
         <X className="w-5 h-5 text-white/80" />
       </button>
 
+      {/* Completion Animation Overlay */}
+      {showCompletionAnimation && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center">
+          {/* Animated background particles */}
+          <div className="absolute inset-0">
+            {[...Array(20)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-2 h-2 bg-white/30 rounded-full animate-pulse"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  animationDuration: `${2 + Math.random() * 2}s`
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Main completion card with pull-up animation */}
+          <div className="relative transform animate-[slide-in-bottom_1s_ease-out] bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 text-center max-w-md mx-4">
+            {/* Success icon with scale animation */}
+            <div className="mb-6 animate-[scale-in_0.8s_ease-out_0.3s_both]">
+              <div className="w-20 h-20 mx-auto bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-12 h-12 text-white animate-[scale-in_0.6s_ease-out_0.5s_both]" />
+              </div>
+            </div>
+
+            {/* Animated text content */}
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-white/90 animate-[fade-in_0.8s_ease-out_0.6s_both]">
+                Story Complete!
+              </h2>
+              <p className="text-white/70 animate-[fade-in_0.8s_ease-out_0.8s_both]">
+                Your visual journey has ended. Ready for more exploration?
+              </p>
+            </div>
+
+            {/* Action buttons with staggered animation */}
+            <div className="flex space-x-3 mt-8">
+              <button
+                onClick={() => {
+                  setIsVideoComplete(false)
+                  setShowCompletionAnimation(false)
+                  setCurrentSlide(0)
+                  setProgress(0)
+                  setIsPlaying(true)
+                }}
+                className="flex-1 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl transition-all duration-300 animate-[fade-in_0.8s_ease-out_1s_both] hover:scale-105"
+              >
+                <Play className="w-4 h-4 inline mr-2" />
+                Watch Again
+              </button>
+              <button
+                onClick={handleFollowUpToggle}
+                className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-4 py-2 rounded-xl transition-all duration-300 animate-[fade-in_0.8s_ease-out_1.2s_both] hover:scale-105"
+              >
+                <Sparkles className="w-4 h-4 inline mr-2" />
+                Explore More
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="relative z-20 flex items-center justify-center">
           <div className="bg-black/40 backdrop-blur-xl p-8 rounded-3xl border border-white/10 text-center space-y-6">
@@ -301,11 +375,11 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
       ) : slides.length > 0 ? (
         <>
           <div
-            className={`relative z-20 max-w-4xl w-full flex flex-col items-center justify-center px-3 py-4 transition-opacity duration-500 ${
+            className={`relative z-20 max-w-4xl w-full flex flex-col items-center justify-center px-3 py-4 transition-all duration-500 ${
               showContent ? "opacity-100" : "opacity-0"
-            }`}
+            } ${showCompletionAnimation ? "transform scale-75 translate-y-8 opacity-30" : ""}`}
           >
-            {/* Updated main image display with click handler and animation */}
+            {/* Updated main image display with click handler and completion state */}
             <div
               className={`relative w-full max-w-3xl aspect-video mb-3 transition-all duration-500 cursor-pointer ${
                 isTransitioning
@@ -313,7 +387,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                     ? "translate-x-[-5%] opacity-0"
                     : "translate-x-[5%] opacity-0"
                   : "translate-x-0 opacity-100"
-              }`}
+              } ${isVideoComplete ? "brightness-50 scale-95" : ""}`}
               onClick={togglePlay}
             >
               {slides[currentSlide]?.imageUrl && (
