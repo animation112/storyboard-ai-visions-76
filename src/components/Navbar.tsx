@@ -1,8 +1,28 @@
 import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
 
 export default function Navbar() {
+  const [isSticky, setIsSticky] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Only make sticky when scrolled past the navbar's original position
+      const scrollY = window.scrollY
+      const triggerPoint = 100 // Adjust this value based on when you want it to become sticky
+      
+      setIsSticky(scrollY > triggerPoint)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
-    <nav className="sticky top-0 z-50 flex justify-center px-4 pt-4 pb-2">
+    <nav className={`flex justify-center px-4 transition-all duration-300 ${
+      isSticky 
+        ? 'fixed top-0 left-0 right-0 z-50 pt-4 pb-2 bg-background/80 backdrop-blur-lg' 
+        : 'pt-4 pb-2'
+    }`}>
       <div className="bg-black/40 backdrop-blur-md border border-white/10 text-white px-16 py-3 rounded-full w-full max-w-5xl shadow-2xl shadow-black/25 transition-all duration-300">
         <div className="flex items-center justify-between">
           {/* Logo */}
