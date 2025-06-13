@@ -59,16 +59,19 @@ class ImageService {
           model: "gemini-2.0-flash-preview-image-generation",
           contents: enhancedPrompt,
           config: {
-            responseModalities: [Modality.IMAGE],
+            responseModalities: [Modality.IMAGE, Modality.TEXT], // Fixed: Added TEXT modality
           },
         });
 
         // Extract image from response
-        for (const part of response.candidates[0].content.parts) {
-          if (part.inlineData) {
-            const imageUrl = `data:image/png;base64,${part.inlineData.data}`;
-            images.push(imageUrl);
-            break; // Only take the first image for each prompt
+        if (response.candidates && response.candidates[0]?.content?.parts) {
+          for (const part of response.candidates[0].content.parts) {
+            if (part.inlineData) {
+              const imageUrl = `data:image/png;base64,${part.inlineData.data}`;
+              images.push(imageUrl);
+              console.log(`Successfully generated image for prompt: ${prompt.substring(0, 50)}...`);
+              break; // Only take the first image for each prompt
+            }
           }
         }
       } catch (error) {
