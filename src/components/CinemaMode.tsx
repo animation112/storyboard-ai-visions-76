@@ -39,6 +39,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   const [activeTab, setActiveTab] = useState<"info" | "chapters" | "next">("info")
   const [isVideoComplete, setIsVideoComplete] = useState(false)
   const [showCompletionAnimation, setShowCompletionAnimation] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const transitionSfxRef = useRef<HTMLAudioElement | null>(null)
   const progressRef = useRef<HTMLDivElement | null>(null)
@@ -227,6 +228,25 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
     }
   }
 
+  // Enhanced close function with closing animation
+  const handleClose = () => {
+    setIsClosing(true)
+    stopAudio()
+    setTimeout(() => {
+      onClose()
+    }, 500) // Wait for animation to complete
+  }
+
+  // Enhanced completion animation close with closing transition
+  const handleCompletionClose = () => {
+    setIsClosing(true)
+    setTimeout(() => {
+      setShowCompletionAnimation(false)
+      setIsVideoComplete(false)
+      setIsClosing(false)
+    }, 300)
+  }
+
   // Updated follow-up handler with box section hiding
   const handleFollowUp = () => {
     if (followUpQuestion.trim()) {
@@ -279,7 +299,9 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
   }, [])
 
   return (
-    <div className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center font-sans overflow-hidden">
+    <div className={`fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center font-sans overflow-hidden transition-all duration-500 ${
+      isClosing ? "animate-[slide-out-bottom_0.5s_ease-in] opacity-0" : ""
+    }`}>
       {/* Blurred background image for ambiance */}
       {slides.length > 0 && slides[currentSlide]?.imageUrl && (
         <div
@@ -291,7 +313,7 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 z-10" />
 
       <button
-        onClick={onClose}
+        onClick={handleClose}
         className="absolute top-6 left-6 z-50 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/50 transition-all duration-200"
       >
         <X className="w-5 h-5 text-white/80" />
@@ -299,7 +321,9 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
 
       {/* Completion Animation Overlay */}
       {showCompletionAnimation && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center">
+        <div className={`absolute inset-0 z-40 flex items-center justify-center transition-all duration-300 ${
+          isClosing ? "animate-[slide-out-bottom_0.3s_ease-in] opacity-0" : ""
+        }`}>
           {/* Animated background particles */}
           <div className="absolute inset-0">
             {[...Array(20)].map((_, i) => (
@@ -358,6 +382,14 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
                 Explore More
               </button>
             </div>
+
+            {/* Close button for completion animation */}
+            <button
+              onClick={handleCompletionClose}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/40 transition-all duration-200"
+            >
+              <X className="w-4 h-4 text-white/80" />
+            </button>
           </div>
         </div>
       )}
@@ -377,7 +409,9 @@ const CinemaMode: React.FC<CinemaModeProps> = ({ slides, isLoading, onClose, onF
           <div
             className={`relative z-20 max-w-4xl w-full flex flex-col items-center justify-center px-3 py-4 transition-all duration-500 ${
               showContent ? "opacity-100" : "opacity-0"
-            } ${showCompletionAnimation ? "transform scale-75 translate-y-8 opacity-30" : ""}`}
+            } ${showCompletionAnimation ? "transform scale-75 translate-y-8 opacity-30" : ""} ${
+              isClosing ? "animate-[slide-out-bottom_0.4s_ease-in] opacity-0" : ""
+            }`}
           >
             {/* Updated main image display with click handler and completion state */}
             <div
