@@ -16,7 +16,7 @@ class ImageService {
   private ai: GoogleGenAI;
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: "AIzaSyDMwNHMeZVWmf0Wtc9BQSsY4mks2yd0aAg" });
+    this.ai = new GoogleGenAI({ apiKey: "AIzaSyDUFGY5Sf2Mx2h1e-NlUAsOU9jaL_y5qLI" });
   }
 
   async generateImages(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {

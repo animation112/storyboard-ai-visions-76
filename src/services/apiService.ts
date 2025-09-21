@@ -102,7 +102,7 @@ class ApiService {
   async refinePrompt(originalPrompt: string, subject: string): Promise<string> {
     try {
       // Use the smarter model for prompt refinement too
-      const ai = new GoogleGenAI({ apiKey: "AIzaSyDMwNHMeZVWmf0Wtc9BQSsY4mks2yd0aAg" });
+      const ai = new GoogleGenAI({ apiKey: "AIzaSyDUFGY5Sf2Mx2h1e-NlUAsOU9jaL_y5qLI" });
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-05-20",
         contents: `Refine this prompt for better visual explanations: "${originalPrompt}" for the subject: "${subject}". Make it more specific and engaging for visual storytelling.`,
