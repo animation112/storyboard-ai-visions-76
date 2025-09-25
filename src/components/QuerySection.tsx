@@ -51,10 +51,10 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   };
 
   const suggestions = [
-    "Explain how rockets work 🚀",
-    "Show me how photosynthesis works 🌱", 
-    "What is artificial intelligence? 🤖",
-    "How do rainbows form? 🌈",
+    "Explain quantum computing in simple terms",
+    "How does photosynthesis work?",
+    "Show me the water cycle process",
+    "What causes climate change?",
   ];
 
   const artStyles = [
@@ -76,17 +76,29 @@ const QuerySection: React.FC<QuerySectionProps> = ({
   ];
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full max-w-4xl mx-auto space-y-12">
+      {/* Header */}
+      <div className="text-center space-y-8">
+        <div className="space-y-2">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground text-center max-w-4xl mx-auto leading-tight tracking-tight">
+            Discover the <span className="inline-block">📸</span> stories
+            <br />
+            behind top <span className="text-red-500">★</span> notch{" "}
+            <span className="border-2 border-foreground rounded-full px-4 py-1 inline-block">design</span>.
+          </h1>
+        </div>
+      </div>
+
       {/* Query Input with Controls */}
-      <div className="w-full space-y-4">
+      <div className="w-full max-w-3xl mx-auto space-y-4">
         <div className="relative">
           <Textarea
-            placeholder="What would you like to learn about today? ✨"
+            placeholder="How can Visual AI help you today?"
             value={query}
             onChange={handleQueryChange}
             onFocus={handleQueryFocus}
             onKeyDown={handleKeyPress}
-            className="min-h-[120px] resize-none pr-20 pb-16 bg-white border-2 border-border rounded-2xl text-lg shadow-playful focus:shadow-lg transition-all"
+            className="min-h-[100px] resize-none pr-20 pb-16 bg-card/50 border-border/20"
             disabled={isLoading}
           />
           
@@ -96,20 +108,20 @@ const QuerySection: React.FC<QuerySectionProps> = ({
               {/* Style Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" size="sm" className="h-9 text-sm rounded-full shadow-cute">
-                    <Palette className="w-4 h-4 mr-2" />
+                  <Button variant="ghost" size="sm" className="h-8 text-xs">
+                    <Palette className="w-3 h-3 mr-1" />
                     {artStyles.find(s => s.value === artStyle)?.label}
                     <ChevronDown className="w-3 h-3 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48 bg-white border-2 border-border rounded-xl shadow-playful">
+                <DropdownMenuContent className="w-48 bg-popover border-border">
                   {artStyles.map((style) => (
                     <DropdownMenuItem 
                       key={style.value}
                       onClick={() => setArtStyle(style.value)}
-                      className="flex flex-col items-start p-3 rounded-lg hover:bg-muted"
+                      className="flex flex-col items-start p-3"
                     >
-                      <div className="font-medium text-foreground">{style.label}</div>
+                      <div className="font-medium">{style.label}</div>
                       <div className="text-xs text-muted-foreground">{style.description}</div>
                     </DropdownMenuItem>
                   ))}
@@ -117,71 +129,72 @@ const QuerySection: React.FC<QuerySectionProps> = ({
               </DropdownMenu>
 
               {/* Voiceover Toggle */}
-              <Button 
-                variant={voiceoverEnabled ? "default" : "outline"} 
-                size="sm" 
-                className="h-9 text-sm rounded-full shadow-cute"
-                onClick={() => onVoiceoverToggle(!voiceoverEnabled)}
-              >
-                {voiceoverEnabled ? (
-                  <Volume2 className="w-4 h-4 mr-2" />
-                ) : (
-                  <VolumeX className="w-4 h-4 mr-2" />
-                )}
-                {voiceoverEnabled ? 'Audio On' : 'Audio Off'}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 text-xs">
+                    {voiceoverEnabled ? (
+                      <Volume2 className="w-3 h-3 mr-1" />
+                    ) : (
+                      <VolumeX className="w-3 h-3 mr-1" />
+                    )}
+                    {voiceoverEnabled ? 'Audio On' : 'Audio Off'}
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-40 bg-popover border-border">
+                  <DropdownMenuItem 
+                    onClick={() => onVoiceoverToggle(true)}
+                    className="flex items-center p-3"
+                  >
+                    <Volume2 className="w-4 h-4 mr-2" />
+                    Audio On
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => onVoiceoverToggle(false)}
+                    className="flex items-center p-3"
+                  >
+                    <VolumeX className="w-4 h-4 mr-2" />
+                    Audio Off
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Send Button */}
             <Button 
-              size="sm"
-              className="h-10 w-16 button-gradient rounded-full shadow-playful hover:shadow-lg transition-all font-semibold"
+              size="icon" 
+              variant="ghost" 
+              className="h-8 w-8"
               onClick={handleSubmit}
               disabled={isLoading || !query.trim()}
             >
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               ) : (
-                <ArrowUp className="w-5 h-5" />
+                <ArrowUp className="w-4 h-4" />
               )}
             </Button>
           </div>
         </div>
 
-        {/* Big Call-to-Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
-            size="lg"
-            className="button-gradient text-white font-semibold text-lg px-8 py-6 rounded-full shadow-playful hover:shadow-lg transition-all animate-bounce-gentle"
-            onClick={handleSubmit}
-            disabled={isLoading || !query.trim()}
-          >
-            <Sparkles className="w-5 h-5 mr-2" />
-            GET STARTED
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="lg"
-            className="border-2 border-primary text-primary font-semibold text-lg px-8 py-6 rounded-full shadow-cute hover:bg-primary hover:text-white transition-all"
-            onClick={() => {
-              setQuery('');
-              setShowSuggestions(true);
-            }}
-          >
-            <RefreshCw className="w-5 h-5 mr-2" />
-            I ALREADY HAVE AN IDEA
-          </Button>
+        {/* Helper Text */}
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span>Visual AI with {voiceoverEnabled ? 'Voiceover' : 'Silent Mode'}</span>
+          </div>
+          <div className="text-xs">
+            Use <kbd className="px-1 py-0.5 bg-muted rounded text-xs">shift + return</kbd> for new line
+          </div>
         </div>
       </div>
 
       {/* Animated Suggestion Cards */}
       {showSuggestions && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl mx-auto">
           {suggestions.map((suggestion, index) => (
             <Card
               key={index}
-              className={`p-4 cursor-pointer hover:bg-accent/20 transition-all duration-300 border-2 border-border bg-white rounded-2xl shadow-cute hover:shadow-playful animate-fade-in`}
+              className={`p-3 cursor-pointer hover:bg-accent/50 transition-all duration-300 border border-border/20 bg-card/50 animate-fade-in`}
               style={{
                 animationDelay: `${index * 100}ms`,
                 animationFillMode: 'both'
@@ -191,14 +204,32 @@ const QuerySection: React.FC<QuerySectionProps> = ({
                 setShowSuggestions(false);
               }}
             >
-              <p className="text-sm text-left font-medium text-foreground">{suggestion}</p>
+              <p className="text-sm text-left">{suggestion}</p>
             </Card>
           ))}
         </div>
       )}
 
+      {/* Refresh Prompts */}
+      {!showSuggestions && (
+        <div className="text-center animate-fade-in">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => {
+              setQuery('');
+              setShowSuggestions(true);
+            }}
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Show suggestions
+          </Button>
+        </div>
+      )}
+
       {/* Footer */}
-      <p className="text-xs text-muted-foreground text-center mt-4">
+      <p className="text-xs text-muted-foreground text-center">
         Visual AI can make mistakes. Please double-check responses.
       </p>
     </div>
