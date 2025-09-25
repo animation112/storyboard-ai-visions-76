@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { ThemeToggle } from "@/components/ThemeToggle";
 import CinemaMode from '../components/CinemaMode';
 import AnimatedCharacter from '../components/AnimatedCharacter';
 import QuerySection from '../components/QuerySection';
