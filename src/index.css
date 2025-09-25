@@ -15,25 +15,25 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
+    --background: 208 74% 57%;
+    --foreground: 0 0% 98%;
+    --card: 208 60% 65%;
+    --card-foreground: 0 0% 98%;
+    --popover: 208 60% 65%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 208 74% 57%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    --secondary: 198 100% 54%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 208 50% 75%;
+    --muted-foreground: 0 0% 25%;
+    --accent: 198 100% 54%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --border: 208 30% 80%;
+    --input: 208 40% 90%;
+    --ring: 217 91% 60%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -49,34 +49,37 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     
-    /* Custom indigo-purple gradient */
-    --green-gradient: linear-gradient(
+    /* Custom blue gradient */
+    --blue-gradient: linear-gradient(
       180deg,
-      #312e81 0%,     /* indigo-900 */
-      #581c87 50%,    /* purple-900 */
-      #000000 100%    /* black */
+      hsl(208, 74%, 57%) 0%,    /* Primary Blue */
+      hsl(198, 100%, 54%) 50%,  /* Secondary Blue */
+      hsl(217, 91%, 60%) 100%   /* Blue-500 */
     );
+    
+    /* Blue variants */
+    --blue-500: 217 91% 60%;
   }
   .dark {
-    --background: 0 0% 3.9%;
+    --background: 208 80% 15%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
+    --card: 208 70% 20%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
+    --popover: 208 70% 20%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
+    --primary: 208 74% 57%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 198 100% 54%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
+    --muted: 208 40% 30%;
+    --muted-foreground: 0 0% 80%;
+    --accent: 198 100% 54%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --border: 208 40% 30%;
+    --input: 208 50% 25%;
+    --ring: 217 91% 60%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -102,14 +105,14 @@ body {
   }
 }
 
-/* Indigo-purple gradient background */
+/* Blue gradient background */
 .gradient-bg {
-  background: var(--green-gradient);
+  background: var(--blue-gradient);
 }
 
-/* Enhanced orb glow effect with matching gradient */
+/* Enhanced orb glow effect with blue gradient */
 .orb-glow {
-  box-shadow: 0 0 40px rgba(49, 46, 129, 0.3), 0 0 80px rgba(88, 28, 135, 0.1), inset 0 0 20px
+  box-shadow: 0 0 40px hsl(208 74% 57% / 0.3), 0 0 80px hsl(198 100% 54% / 0.1), inset 0 0 20px
     rgba(255, 255, 255, 0.1);
 }
 
