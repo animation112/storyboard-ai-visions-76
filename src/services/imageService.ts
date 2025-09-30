@@ -56,7 +56,7 @@ class ImageService {
         const enhancedPrompt = this.enhancePrompt(prompt, artStyle);
         
         const response = await this.ai.models.generateContent({
-          model: "gemini-2.5-flash-image-preview",
+          model: "gemini-2.0-flash-preview-image-generation",
           contents: enhancedPrompt,
           config: {
             responseModalities: [Modality.IMAGE, Modality.TEXT], // Fixed: Added TEXT modality

@@ -1,18 +1,20 @@
-import { GoogleGenAI } from '@google/genai';
+
+import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 
 export class TTSService {
-  private ai: GoogleGenAI;
-  private readonly voiceName = 'Puck'; // Upbeat voice
+  private client: ElevenLabsClient;
+  private readonly voiceId = 'JBFqnCBsd6RMkjVDRZzb'; // George voice
   private isApiKeyValid = true;
 
   constructor() {
-    this.ai = new GoogleGenAI({ 
-      apiKey: 'AIzaSyDUFGY5Sf2Mx2h1e-NlUAsOU9jaL_y5qLI'
+    this.client = new ElevenLabsClient({
+      apiKey: 'sk_01cb6718bf949a0f6df964e398f1b6035d8561c7aaa2a20c'
     });
   }
 
   async generateSpeech(text: string): Promise<string> {
     try {
+      // If we know the API key is invalid, return empty string immediately
       if (!this.isApiKeyValid) {
         console.log('TTS API key is invalid, skipping audio generation');
         return '';
@@ -20,53 +22,37 @@ export class TTSService {
 
       console.log('Generating speech for text:', text);
       
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash-preview-tts',
-        contents: [{ parts: [{ text }] }],
-        config: {
-          responseModalities: ['AUDIO'],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: this.voiceName },
-            },
-          },
-        },
+      const audioStream = await this.client.textToSpeech.stream(this.voiceId, {
+        text: text,
+        modelId: 'eleven_multilingual_v2', // Using v2 instead of v3 as it's more widely available
+        outputFormat: 'mp3_44100_128'
       });
 
-      const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      
-      if (!audioData) {
-        console.error('No audio data in response');
-        return '';
+      // Convert stream to blob
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of audioStream) {
+        chunks.push(chunk);
       }
 
-      // Convert base64 to WAV blob
-      const audioBuffer = this.base64ToArrayBuffer(audioData);
-      const wavBlob = new Blob([audioBuffer], { type: 'audio/wav' });
-      const audioUrl = URL.createObjectURL(wavBlob);
+      const audioBlob = new Blob(chunks, { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
       
       console.log('Speech generated successfully');
       return audioUrl;
     } catch (error: any) {
       console.error('Error generating speech:', error);
       
-      if (error.status === 403 || error.status === 401) {
-        console.error('Gemini API key is invalid or access denied. Disabling TTS for this session.');
+      // Check if it's a 403 error (model access denied) or 401 (invalid API key)
+      if (error.statusCode === 403 || error.statusCode === 401) {
+        console.error('ElevenLabs API key is invalid or model access denied. Disabling TTS for this session.');
         this.isApiKeyValid = false;
       }
       
+      // Return empty string instead of throwing - this allows the app to continue without audio
       return '';
     }
   }
 
-  private base64ToArrayBuffer(base64: string): ArrayBuffer {
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
-  }
   async generateMultipleSpeechFiles(texts: string[]): Promise<string[]> {
     console.log('Generating multiple speech files:', texts.length);
     const audioUrls: string[] = [];
