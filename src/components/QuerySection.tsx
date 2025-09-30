@@ -98,7 +98,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
             onChange={handleQueryChange}
             onFocus={handleQueryFocus}
             onKeyDown={handleKeyPress}
-            className="min-h-[100px] resize-none pr-20 pb-16 bg-card/50 border-border/20"
+            className="min-h-[100px] resize-none pr-20 pb-16 bg-card/50 border-border/20 placeholder:text-foreground"
             disabled={isLoading}
           />
           
@@ -180,7 +180,7 @@ const QuerySection: React.FC<QuerySectionProps> = ({
         {/* Helper Text */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <span>Visual AI with {voiceoverEnabled ? 'Voiceover' : 'Silent Mode'}</span>
+            <span className="text-foreground">Visual AI with {voiceoverEnabled ? 'Voiceover' : 'Silent Mode'}</span>
           </div>
           <div className="text-xs">
             Use <kbd className="px-1 py-0.5 bg-muted rounded text-xs">shift + return</kbd> for new line
