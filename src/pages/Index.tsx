@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import CinemaMode from '../components/CinemaMode';
 import AnimatedCharacter from '../components/AnimatedCharacter';
 import QuerySection from '../components/QuerySection';
-import Navbar from '../components/Navbar';
 import { apiService } from '../services/apiService';
 import { useTTS } from '../hooks/useTTS';
 import { toast } from 'sonner';
@@ -121,11 +120,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Navbar */}
-      <Navbar />
-
-      {/* Main Content with increased top spacing */}
-      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-140px)] p-4 pt-16">
+      {/* Main Content */}
+      <main className="flex flex-col items-center justify-center min-h-screen p-4">
         <QuerySection
           onSubmit={handleQuerySubmit}
           isLoading={isLoading}
