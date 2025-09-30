@@ -55,7 +55,7 @@ Image: [Detailed prompt for ${styleInstructions.description}]
 Continue this exact pattern for all 10 slides.`;
 
       const response = await this.ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-05-20",
+        model: "gemini-2.5-flash-preview-09-2025",
         contents: `${prompt}\n\n${systemPrompt}`,
       });
 
